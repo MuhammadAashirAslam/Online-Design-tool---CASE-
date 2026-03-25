@@ -163,8 +163,11 @@ const Canvas = forwardRef<SVGSVGElement, CanvasProps>(({
       }
 
       setHoverTargetId(best?.id || null);
-    } else if (hoverTargetId) {
-      setHoverTargetId(null);
+    } else {
+      const hoveredEl = [...elements].reverse().find(el =>
+        pos.x >= el.x && pos.x <= el.x + el.width && pos.y >= el.y && pos.y <= el.y + el.height
+      );
+      setHoverTargetId(hoveredEl?.id || null);
     }
   };
 
@@ -608,40 +611,42 @@ const Canvas = forwardRef<SVGSVGElement, CanvasProps>(({
     if (!source) return null;
 
     const targetEl = hoverTargetId ? elements.find(e => e.id === hoverTargetId) : undefined;
-    const targetPoint = targetEl
-      ? getCenterPoint(targetEl)
-      : mouseCanvasPos;
+    
+    let targetPoint = mouseCanvasPos;
+    if (targetEl) {
+      const cx = targetEl.x + targetEl.width / 2;
+      const cy = targetEl.y + targetEl.height / 2;
+      const hardpoints = [
+        { x: cx, y: targetEl.y },
+        { x: cx, y: targetEl.y + targetEl.height },
+        { x: targetEl.x, y: cy },
+        { x: targetEl.x + targetEl.width, y: cy }
+      ];
+      let minD = Infinity;
+      let bestHp = hardpoints[0];
+      for (const hp of hardpoints) {
+        const d = Math.hypot(hp.x - mouseCanvasPos.x, hp.y - mouseCanvasPos.y);
+        if (d < minD) {
+          minD = d;
+          bestHp = hp;
+        }
+      }
+      targetPoint = bestHp;
+    }
 
     const isAssociation = activeTool === 'association';
+    
     const sp = isAssociation
       ? getPerimeterPoint(source, targetPoint.x, targetPoint.y)
       : getEdgePoint(source, targetPoint.x, targetPoint.y);
 
-    const ep = targetEl
-      ? (isAssociation
-        ? getPerimeterPoint(targetEl, sp.x, sp.y)
-        : getEdgePoint(targetEl, sp.x, sp.y))
-      : targetPoint;
+    const ep = targetPoint;
 
     const isDashed = ['dependency', 'realization', 'include', 'extend'].includes(activeTool);
     const markerId = `url(#arrow-${activeTool})`;
 
     return (
       <g pointerEvents="none">
-        {targetEl && (
-          <rect
-            x={targetEl.x - 5}
-            y={targetEl.y - 5}
-            width={targetEl.width + 10}
-            height={targetEl.height + 10}
-            rx={8}
-            fill="none"
-            stroke="#534AB7"
-            strokeWidth={1.5}
-            strokeDasharray="6 3"
-            opacity={0.8}
-          />
-        )}
         <line
           x1={sp.x}
           y1={sp.y}
@@ -691,10 +696,11 @@ const Canvas = forwardRef<SVGSVGElement, CanvasProps>(({
           {elements.map(el => {
             const isSelected = el.id === selectedId;
             const isConnectingSource = el.id === connectingFrom;
-            const isConnectorTool = ['association', 'inheritance', 'realization', 'dependency', 'aggregation', 'composition', 'include', 'extend'].includes(activeTool);
+            const isHoverTarget = el.id === hoverTargetId;
+            const isConnectorTool = connectorTools.includes(activeTool);
             
-            // Only show hardpoints if element is selected, or if we are using a connector tool
-            if (!isSelected && !isConnectorTool && !isConnectingSource) return null;
+            // Show hardpoints if element is selected, hovered, or connecting source
+            if (!isSelected && !isConnectingSource && !isHoverTarget) return null;
 
             const cx = el.x + el.width / 2;
             const cy = el.y + el.height / 2;
@@ -705,20 +711,37 @@ const Canvas = forwardRef<SVGSVGElement, CanvasProps>(({
               { x: el.x + el.width, y: cy }      // Right
             ];
 
+            // If actively snapping to this element, highlight the closest hardpoint
+            let activeHpIndex = -1;
+            if (isConnectorTool && connectingFrom && isHoverTarget && mouseCanvasPos) {
+              let minD = Infinity;
+              hardpoints.forEach((p, i) => {
+                const d = Math.hypot(p.x - mouseCanvasPos.x, p.y - mouseCanvasPos.y);
+                if (d < minD) {
+                  minD = d;
+                  activeHpIndex = i;
+                }
+              });
+            }
+
             return (
               <g key={`hp-${el.id}`}>
-                {hardpoints.map((p, i) => (
-                  <circle
-                    key={i}
-                    cx={p.x}
-                    cy={p.y}
-                    r={3.5}
-                    fill="#534AB7"
-                    stroke="#fff"
-                    strokeWidth={1.5}
-                    style={{ pointerEvents: 'none' }}
-                  />
-                ))}
+                {hardpoints.map((p, i) => {
+                  const isActive = i === activeHpIndex;
+                  return (
+                    <circle
+                      key={i}
+                      cx={p.x}
+                      cy={p.y}
+                      r={isActive ? 6 : 3.5}
+                      fill={isActive ? '#10b981' : 'none'}
+                      stroke={isActive ? '#fff' : '#534AB7'}
+                      strokeWidth={isActive ? 2 : 1.5}
+                      opacity={isActive ? 1 : 0.6}
+                      style={{ pointerEvents: 'none', transition: 'all 0.15s ease' }}
+                    />
+                  );
+                })}
               </g>
             );
           })}
