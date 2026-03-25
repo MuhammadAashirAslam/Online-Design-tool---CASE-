@@ -1,0 +1,299 @@
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import { Project, ArchStyle } from '../types';
+import { getViewTemplatesByArchStyle } from '../lib/architectureTemplates';
+import { getTemplateSeed } from '../lib/templateSeeds';
+import '../styles/dashboard.css';
+
+const ARCH_TEMPLATES: { label: string; value: ArchStyle }[] = [
+  { label: 'MVC Pattern', value: 'mvc' },
+  { label: 'Layered (4-tier)', value: 'layered' },
+  { label: 'Client-Server', value: 'client-server' },
+  { label: 'Pipe & Filter', value: 'pipe-filter' },
+  { label: 'SOA / Microservices', value: 'soa' },
+  { label: 'Component-Based', value: 'component-based' },
+];
+
+function loadProjects(): Project[] {
+  try { return JSON.parse(localStorage.getItem('odt_projects') || '[]'); }
+  catch { return []; }
+}
+function saveProjects(projects: Project[]) {
+  localStorage.setItem('odt_projects', JSON.stringify(projects));
+}
+
+export default function Dashboard() {
+  const { user, isGuest, signOut } = useAuth();
+  const navigate = useNavigate();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newArch, setNewArch] = useState<ArchStyle>('custom');
+  const [activeTab, setActiveTab] = useState<'projects' | 'templates'>('projects');
+  const templatesSectionRef = useRef<HTMLElement | null>(null);
+  const mainRef = useRef<HTMLElement | null>(null);
+
+  const initials = user?.user_metadata?.username
+    ? user.user_metadata.username.slice(0, 2).toUpperCase()
+    : 'G';
+
+  useEffect(() => { setProjects(loadProjects()); }, []);
+
+  function createProject() {
+    if (!newName.trim()) return;
+    const p: Project = {
+      id: 'proj-' + Date.now(),
+      owner_id: user?.id || 'guest',
+      name: newName.trim(),
+      arch_style: newArch,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    const updated = [p, ...projects];
+    setProjects(updated);
+    saveProjects(updated);
+
+    // Create architecture-specific 4+1 diagrams
+    const viewTemplates = getViewTemplatesByArchStyle(newArch);
+    const diagrams = viewTemplates.map((tpl) => ({
+      id: `diag-${p.id}-${tpl.view}`,
+      project_id: p.id,
+      name: tpl.name,
+      uml_type: tpl.umlType,
+      view_type: tpl.view,
+      is_valid: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }));
+    localStorage.setItem(`odt_diagrams_${p.id}`, JSON.stringify(diagrams));
+
+    // Seed diagram content for predefined architecture templates
+    diagrams.forEach((diag) => {
+      const seed = getTemplateSeed(newArch, diag);
+      localStorage.setItem(`odt_elements_${p.id}_${diag.id}`, JSON.stringify(seed.elements));
+      localStorage.setItem(`odt_connectors_${p.id}_${diag.id}`, JSON.stringify(seed.connectors));
+    });
+
+    setShowCreate(false);
+    setNewName('');
+    setNewArch('custom');
+    navigate(`/editor/${p.id}`);
+  }
+
+  function deleteProject(id: string) {
+    if (!confirm('Delete this project and all its diagrams?')) return;
+    const updated = projects.filter(p => p.id !== id);
+    setProjects(updated);
+    saveProjects(updated);
+    // Clean up diagram data
+    const views = ['scenario', 'logical', 'development', 'process', 'physical'];
+    views.forEach(v => {
+      localStorage.removeItem(`odt_elements_${id}_diag-${id}-${v}`);
+      localStorage.removeItem(`odt_connectors_${id}_diag-${id}-${v}`);
+    });
+    localStorage.removeItem(`odt_diagrams_${id}`);
+  }
+
+  function formatDate(dateStr: string) {
+    const d = new Date(dateStr);
+    const now = new Date();
+    const diff = now.getTime() - d.getTime();
+    const hours = Math.floor(diff / 3600000);
+    if (hours < 1) return 'Just now';
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d ago`;
+    return d.toLocaleDateString();
+  }
+
+  const archLabel = (style: string) =>
+    ARCH_TEMPLATES.find(t => t.value === style)?.label || style;
+
+  function goToProjectsTab() {
+    setActiveTab('projects');
+    mainRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function goToTemplatesTab() {
+    setActiveTab('templates');
+    templatesSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  return (
+    <div className="dashboard">
+      {/* Top nav */}
+      <nav className="dash-nav">
+        <div className="dash-nav-brand">⬡ ODT</div>
+        <div className="dash-nav-tabs">
+          <button className={`dash-tab ${activeTab === 'projects' ? 'active' : ''}`} onClick={goToProjectsTab}>My Projects</button>
+          <button className={`dash-tab ${activeTab === 'templates' ? 'active' : ''}`} onClick={goToTemplatesTab}>Templates</button>
+        </div>
+        <div style={{ flex: 1 }} />
+        <div className="dash-nav-right">
+          {isGuest ? (
+            <>
+              <Link to="/login" className="btn btn-ghost btn-sm">Sign in</Link>
+              <Link to="/signup" className="btn btn-primary btn-sm">Sign up</Link>
+            </>
+          ) : (
+            <>
+              <div className="avatar" title={user?.email || ''}>
+                {initials}
+              </div>
+              <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{user?.user_metadata?.username}</span>
+              <button className="btn btn-ghost btn-sm" onClick={signOut}>Sign out</button>
+            </>
+          )}
+        </div>
+      </nav>
+
+      <main ref={mainRef} className="dash-main">
+        {/* Guest banner */}
+        {isGuest && (
+          <div className="guest-banner">
+            <span>👋 You're using ODT as a guest. Your work is saved locally in this browser.</span>
+            <Link to="/signup" className="btn btn-primary btn-sm">Create Account</Link>
+          </div>
+        )}
+
+        {/* Header */}
+        <div className="dash-header">
+          <div>
+            <h1>My Projects</h1>
+            <p className="dash-subtitle">
+              {projects.length} project{projects.length !== 1 ? 's' : ''}{isGuest ? ' · Guest mode' : ''}
+            </p>
+          </div>
+          <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
+            + New Project
+          </button>
+        </div>
+
+        {/* Stats row */}
+        <div className="stats-row">
+          <div className="stat-card">
+            <div className="stat-label">Total Projects</div>
+            <div className="stat-value">{projects.length}</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-label">Diagrams</div>
+            <div className="stat-value">{projects.length * 5}</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-label">Architecture Styles</div>
+            <div className="stat-value">{new Set(projects.map(p => p.arch_style)).size || 0}</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-label">Templates Available</div>
+            <div className="stat-value">{ARCH_TEMPLATES.length}</div>
+          </div>
+        </div>
+
+        {/* Project cards */}
+        <div className="project-grid">
+          {projects.map(project => (
+            <div key={project.id} className="card project-card" onClick={() => navigate(`/editor/${project.id}`)}>
+              <div className="project-card-preview">
+                <div className="project-card-badge badge badge-brand">{archLabel(project.arch_style)}</div>
+                <ProjectPreviewSVG style={project.arch_style} />
+              </div>
+              <div className="project-card-body">
+                <div className="project-card-title">{project.name}</div>
+                <div className="project-card-meta">{archLabel(project.arch_style)} · {formatDate(project.updated_at)}</div>
+                <div className="project-card-actions">
+                  <button className="btn btn-ghost btn-sm" onClick={e => { e.stopPropagation(); deleteProject(project.id); }}>Delete</button>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          <div className="card project-card project-card-new" onClick={() => setShowCreate(true)}>
+            <div className="project-card-new-inner">
+              <div className="project-card-new-icon">+</div>
+              <div className="project-card-new-label">New Project</div>
+              <div className="project-card-new-sub">From template or blank</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Architecture Templates */}
+        <section ref={templatesSectionRef} className="templates-section">
+          <h2>Architecture Templates</h2>
+          <div className="templates-strip">
+            {ARCH_TEMPLATES.map(t => (
+              <button key={t.value} className="template-chip" onClick={() => { setNewArch(t.value); setShowCreate(true); }}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </section>
+      </main>
+
+      {/* Create Project Modal */}
+      {showCreate && (
+        <div className="modal-overlay" onClick={() => setShowCreate(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h2>Create New Project</h2>
+            <div style={{ marginBottom: 16 }}>
+              <label className="label">Project Name</label>
+              <input className="input" placeholder="Hospital Management System" value={newName} onChange={e => setNewName(e.target.value)} autoFocus onKeyDown={e => e.key === 'Enter' && createProject()} />
+            </div>
+            <div style={{ marginBottom: 24 }}>
+              <label className="label">Architecture Style</label>
+              <select className="input" value={newArch} onChange={e => setNewArch(e.target.value as ArchStyle)}>
+                <option value="custom">Custom / Blank</option>
+                {ARCH_TEMPLATES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button className="btn btn-secondary" onClick={() => setShowCreate(false)}>Cancel</button>
+              <button className="btn btn-primary" onClick={createProject}>Create Project</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProjectPreviewSVG({ style }: { style: string }) {
+  if (style === 'layered') {
+    return (
+      <svg width="140" height="80" viewBox="0 0 140 80">
+        <rect x="10" y="5" width="120" height="20" rx="3" fill="rgba(255,255,255,0.7)" stroke="var(--brand-200)" />
+        <text x="70" y="18" textAnchor="middle" fontSize="8" fill="var(--brand-600)" fontFamily="var(--font-sans)">Presentation</text>
+        <rect x="10" y="30" width="120" height="20" rx="3" fill="rgba(255,255,255,0.7)" stroke="var(--brand-200)" />
+        <text x="70" y="43" textAnchor="middle" fontSize="8" fill="var(--brand-600)" fontFamily="var(--font-sans)">Business Logic</text>
+        <rect x="10" y="55" width="120" height="20" rx="3" fill="rgba(255,255,255,0.7)" stroke="var(--brand-200)" />
+        <text x="70" y="68" textAnchor="middle" fontSize="8" fill="var(--brand-600)" fontFamily="var(--font-sans)">Data Access</text>
+      </svg>
+    );
+  }
+  if (style === 'mvc') {
+    return (
+      <svg width="140" height="80" viewBox="0 0 140 80">
+        <rect x="40" y="5" width="60" height="18" rx="3" fill="rgba(255,255,255,0.7)" stroke="var(--brand-200)" />
+        <text x="70" y="17" textAnchor="middle" fontSize="7" fill="var(--brand-600)" fontFamily="var(--font-sans)">Controller</text>
+        <rect x="5" y="45" width="50" height="18" rx="3" fill="rgba(255,255,255,0.7)" stroke="var(--brand-200)" />
+        <text x="30" y="57" textAnchor="middle" fontSize="7" fill="var(--brand-600)" fontFamily="var(--font-sans)">Model</text>
+        <rect x="85" y="45" width="50" height="18" rx="3" fill="rgba(255,255,255,0.7)" stroke="var(--brand-200)" />
+        <text x="110" y="57" textAnchor="middle" fontSize="7" fill="var(--brand-600)" fontFamily="var(--font-sans)">View</text>
+        <line x1="55" y1="23" x2="30" y2="45" stroke="var(--brand-200)" />
+        <line x1="85" y1="23" x2="110" y2="45" stroke="var(--brand-200)" />
+        <line x1="55" y1="54" x2="85" y2="54" stroke="var(--brand-200)" />
+      </svg>
+    );
+  }
+  return (
+    <svg width="140" height="80" viewBox="0 0 140 80">
+      <rect x="10" y="10" width="50" height="35" rx="3" fill="rgba(255,255,255,0.7)" stroke="var(--brand-200)" />
+      <text x="35" y="23" textAnchor="middle" fontSize="7" fill="var(--brand-600)" fontFamily="var(--font-sans)" fontWeight="500">ClassA</text>
+      <line x1="10" y1="27" x2="60" y2="27" stroke="var(--brand-200)" strokeWidth="0.8" />
+      <rect x="80" y="10" width="50" height="35" rx="3" fill="rgba(255,255,255,0.7)" stroke="var(--brand-200)" />
+      <text x="105" y="23" textAnchor="middle" fontSize="7" fill="var(--brand-600)" fontFamily="var(--font-sans)" fontWeight="500">ClassB</text>
+      <line x1="80" y1="27" x2="130" y2="27" stroke="var(--brand-200)" strokeWidth="0.8" />
+      <line x1="60" y1="27" x2="80" y2="27" stroke="var(--brand-400)" />
+    </svg>
+  );
+}

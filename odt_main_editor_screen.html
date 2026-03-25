@@ -1,0 +1,194 @@
+
+<div style="font-family:var(--font-sans);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;background:var(--color-background-primary)">
+
+  <!-- Topbar -->
+  <div style="display:flex;align-items:center;padding:0 12px;height:44px;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);gap:12px">
+    <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);min-width:60px">ODT</div>
+    <div style="display:flex;gap:2px">
+      <button style="font-size:12px;padding:4px 10px;border-radius:6px;border:0.5px solid var(--color-border-tertiary);background:transparent;color:var(--color-text-secondary);cursor:pointer">File</button>
+      <button style="font-size:12px;padding:4px 10px;border-radius:6px;border:0.5px solid var(--color-border-tertiary);background:transparent;color:var(--color-text-secondary);cursor:pointer">Edit</button>
+      <button style="font-size:12px;padding:4px 10px;border-radius:6px;border:0.5px solid var(--color-border-tertiary);background:transparent;color:var(--color-text-secondary);cursor:pointer">View</button>
+      <button style="font-size:12px;padding:4px 10px;border-radius:6px;border:0.5px solid var(--color-border-tertiary);background:transparent;color:var(--color-text-secondary);cursor:pointer">Tools</button>
+      <button style="font-size:12px;padding:4px 10px;border-radius:6px;border:0.5px solid var(--color-border-tertiary);background:transparent;color:var(--color-text-secondary);cursor:pointer">Export</button>
+    </div>
+    <div style="flex:1;text-align:center;font-size:13px;color:var(--color-text-secondary)">Hospital_Management_System.odt</div>
+    <!-- collab avatars -->
+    <div style="display:flex;align-items:center;gap:6px">
+      <div style="display:flex">
+        <div style="width:26px;height:26px;border-radius:50%;background:#CECBF6;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:#3C3489;border:2px solid var(--color-background-primary);margin-right:-6px">AH</div>
+        <div style="width:26px;height:26px;border-radius:50%;background:#9FE1CB;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:#085041;border:2px solid var(--color-background-primary);margin-right:-6px">SA</div>
+        <div style="width:26px;height:26px;border-radius:50%;background:#FAC775;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:#633806;border:2px solid var(--color-background-primary)">MK</div>
+      </div>
+      <div style="font-size:11px;color:var(--color-text-secondary)">3 online</div>
+    </div>
+    <button style="font-size:12px;padding:5px 14px;border-radius:6px;border:none;background:#534AB7;color:#fff;cursor:pointer;font-weight:500">Share</button>
+  </div>
+
+  <!-- 4+1 View Tabs -->
+  <div style="display:flex;align-items:center;padding:0 16px;height:36px;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);gap:4px">
+    <div style="font-size:11px;color:var(--color-text-secondary);margin-right:6px">4+1 Views:</div>
+    <div id="tab-scenario"  onclick="switchTab('scenario')"  style="font-size:12px;padding:4px 12px;border-radius:6px;background:#EEEDFE;color:#534AB7;cursor:pointer;font-weight:500;border:0.5px solid #AFA9EC">Scenario</div>
+    <div id="tab-logical"   onclick="switchTab('logical')"   style="font-size:12px;padding:4px 12px;border-radius:6px;background:transparent;color:var(--color-text-secondary);cursor:pointer;border:0.5px solid transparent">Logical</div>
+    <div id="tab-dev"       onclick="switchTab('dev')"       style="font-size:12px;padding:4px 12px;border-radius:6px;background:transparent;color:var(--color-text-secondary);cursor:pointer;border:0.5px solid transparent">Development</div>
+    <div id="tab-process"   onclick="switchTab('process')"   style="font-size:12px;padding:4px 12px;border-radius:6px;background:transparent;color:var(--color-text-secondary);cursor:pointer;border:0.5px solid transparent">Process</div>
+    <div id="tab-physical"  onclick="switchTab('physical')"  style="font-size:12px;padding:4px 12px;border-radius:6px;background:transparent;color:var(--color-text-secondary);cursor:pointer;border:0.5px solid transparent">Physical</div>
+    <div style="flex:1"></div>
+    <div style="font-size:11px;color:var(--color-text-secondary)">Diagram: Use Case</div>
+    <div style="width:1px;height:16px;background:var(--color-border-tertiary);margin:0 6px"></div>
+    <div style="font-size:11px;color:var(--color-text-success)">✓ Valid UML</div>
+  </div>
+
+  <div style="display:flex;height:480px">
+
+    <!-- Left sidebar: shape palette -->
+    <div style="width:64px;border-right:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:4px">
+      <div style="font-size:9px;color:var(--color-text-secondary);margin-bottom:4px;letter-spacing:0.5px">TOOLS</div>
+      <!-- tool icons as simple shapes -->
+      <div title="Select" style="width:36px;height:36px;border-radius:8px;background:#EEEDFE;border:0.5px solid #AFA9EC;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px">↖</div>
+      <div title="Class" style="width:36px;height:36px;border-radius:8px;border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--color-background-primary)">
+        <svg width="20" height="20" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="2" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.2"/><line x1="2" y1="7" x2="18" y2="7" stroke="var(--color-text-secondary)" stroke-width="1"/><line x1="2" y1="12" x2="18" y2="12" stroke="var(--color-text-secondary)" stroke-width="1"/></svg>
+      </div>
+      <div title="Actor" style="width:36px;height:36px;border-radius:8px;border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--color-background-primary)">
+        <svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="5" r="3" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.2"/><line x1="10" y1="8" x2="10" y2="15" stroke="var(--color-text-secondary)" stroke-width="1.2"/><line x1="5" y1="11" x2="15" y2="11" stroke="var(--color-text-secondary)" stroke-width="1.2"/><line x1="10" y1="15" x2="6" y2="19" stroke="var(--color-text-secondary)" stroke-width="1.2"/><line x1="10" y1="15" x2="14" y2="19" stroke="var(--color-text-secondary)" stroke-width="1.2"/></svg>
+      </div>
+      <div title="Use Case" style="width:36px;height:36px;border-radius:8px;border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--color-background-primary)">
+        <svg width="22" height="16" viewBox="0 0 22 16"><ellipse cx="11" cy="8" rx="9" ry="6" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.2"/></svg>
+      </div>
+      <div title="Component" style="width:36px;height:36px;border-radius:8px;border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--color-background-primary)">
+        <svg width="20" height="20" viewBox="0 0 20 20"><rect x="4" y="3" width="12" height="14" rx="1.5" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.2"/><rect x="1" y="6" width="5" height="3" rx="1" fill="none" stroke="var(--color-text-secondary)" stroke-width="1"/><rect x="1" y="11" width="5" height="3" rx="1" fill="none" stroke="var(--color-text-secondary)" stroke-width="1"/></svg>
+      </div>
+      <div title="Node" style="width:36px;height:36px;border-radius:8px;border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--color-background-primary)">
+        <svg width="20" height="20" viewBox="0 0 20 20"><rect x="3" y="5" width="14" height="12" rx="1.5" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.2"/><path d="M3 5L8 1H17L17 13" fill="none" stroke="var(--color-text-secondary)" stroke-width="1"/><line x1="8" y1="1" x2="8" y2="5" stroke="var(--color-text-secondary)" stroke-width="1"/></svg>
+      </div>
+      <div title="Association" style="width:36px;height:36px;border-radius:8px;border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--color-background-primary)">
+        <svg width="22" height="14" viewBox="0 0 22 14"><line x1="2" y1="7" x2="18" y2="7" stroke="var(--color-text-secondary)" stroke-width="1.2"/><polygon points="14,4 20,7 14,10" fill="var(--color-text-secondary)"/></svg>
+      </div>
+      <div title="Inheritance" style="width:36px;height:36px;border-radius:8px;border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--color-background-primary)">
+        <svg width="22" height="14" viewBox="0 0 22 14"><line x1="2" y1="7" x2="16" y2="7" stroke="var(--color-text-secondary)" stroke-width="1.2"/><polygon points="13,3 20,7 13,11" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.2"/></svg>
+      </div>
+      <div style="flex:1"></div>
+      <div title="Validate" style="width:36px;height:36px;border-radius:8px;border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--color-background-primary);font-size:16px">✓</div>
+    </div>
+
+    <!-- Canvas area -->
+    <div style="flex:1;background:var(--color-background-tertiary);position:relative;overflow:hidden">
+      <!-- Grid dots -->
+      <svg width="100%" height="100%" style="position:absolute;top:0;left:0" xmlns="http://www.w3.org/2000/svg">
+        <defs><pattern id="g" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="0.8" fill="var(--color-border-tertiary)"/></pattern></defs>
+        <rect width="100%" height="100%" fill="url(#g)"/>
+
+        <!-- System boundary -->
+        <rect x="80" y="30" width="340" height="320" rx="10" fill="none" stroke="var(--color-border-secondary)" stroke-width="1" stroke-dasharray="6 4"/>
+        <text x="250" y="22" text-anchor="middle" font-size="11" fill="var(--color-text-secondary)" font-family="var(--font-sans)">Hospital Management System</text>
+
+        <!-- Actors left -->
+        <g>
+          <circle cx="38" cy="110" r="12" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.2"/>
+          <line x1="38" y1="122" x2="38" y2="155" stroke="var(--color-text-secondary)" stroke-width="1.2"/>
+          <line x1="22" y1="138" x2="54" y2="138" stroke="var(--color-text-secondary)" stroke-width="1.2"/>
+          <line x1="38" y1="155" x2="24" y2="172" stroke="var(--color-text-secondary)" stroke-width="1.2"/>
+          <line x1="38" y1="155" x2="52" y2="172" stroke="var(--color-text-secondary)" stroke-width="1.2"/>
+          <text x="38" y="186" text-anchor="middle" font-size="11" fill="var(--color-text-secondary)" font-family="var(--font-sans)">Patient</text>
+        </g>
+        <g>
+          <circle cx="38" cy="260" r="12" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.2"/>
+          <line x1="38" y1="272" x2="38" y2="305" stroke="var(--color-text-secondary)" stroke-width="1.2"/>
+          <line x1="22" y1="288" x2="54" y2="288" stroke="var(--color-text-secondary)" stroke-width="1.2"/>
+          <line x1="38" y1="305" x2="24" y2="322" stroke="var(--color-text-secondary)" stroke-width="1.2"/>
+          <line x1="38" y1="305" x2="52" y2="322" stroke="var(--color-text-secondary)" stroke-width="1.2"/>
+          <text x="38" y="336" text-anchor="middle" font-size="11" fill="var(--color-text-secondary)" font-family="var(--font-sans)">Doctor</text>
+        </g>
+
+        <!-- Use cases -->
+        <ellipse cx="220" cy="90" rx="76" ry="24" fill="#E6F1FB" stroke="#378ADD" stroke-width="1"/>
+        <text x="220" y="94" text-anchor="middle" font-size="11" fill="#0C447C" font-family="var(--font-sans)" font-weight="500">Book Appointment</text>
+
+        <ellipse cx="220" cy="165" rx="76" ry="24" fill="#E6F1FB" stroke="#378ADD" stroke-width="1"/>
+        <text x="220" y="169" text-anchor="middle" font-size="11" fill="#0C447C" font-family="var(--font-sans)" font-weight="500">View Medical Records</text>
+
+        <ellipse cx="220" cy="240" rx="76" ry="24" fill="#E6F1FB" stroke="#378ADD" stroke-width="1"/>
+        <text x="220" y="244" text-anchor="middle" font-size="11" fill="#0C447C" font-family="var(--font-sans)" font-weight="500">Manage Prescriptions</text>
+
+        <ellipse cx="220" cy="315" rx="76" ry="24" fill="#E6F1FB" stroke="#378ADD" stroke-width="1"/>
+        <text x="220" y="319" text-anchor="middle" font-size="11" fill="#0C447C" font-family="var(--font-sans)" font-weight="500">Generate Reports</text>
+
+        <!-- Actor connections -->
+        <line x1="50" y1="120" x2="144" y2="90" stroke="var(--color-text-secondary)" stroke-width="0.8"/>
+        <line x1="50" y1="125" x2="144" y2="165" stroke="var(--color-text-secondary)" stroke-width="0.8"/>
+        <line x1="50" y1="275" x2="144" y2="240" stroke="var(--color-text-secondary)" stroke-width="0.8"/>
+        <line x1="50" y1="270" x2="144" y2="315" stroke="var(--color-text-secondary)" stroke-width="0.8"/>
+        <line x1="50" y1="270" x2="144" y2="165" stroke="var(--color-text-secondary)" stroke-width="0.8"/>
+
+        <!-- selected element highlight -->
+        <ellipse cx="220" cy="165" rx="80" ry="28" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-dasharray="4 3"/>
+      </svg>
+
+      <!-- Zoom controls -->
+      <div style="position:absolute;bottom:12px;right:12px;display:flex;gap:4px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:8px;padding:4px">
+        <button style="font-size:14px;width:28px;height:28px;border:none;background:transparent;cursor:pointer;border-radius:6px;color:var(--color-text-secondary)">−</button>
+        <span style="font-size:12px;line-height:28px;padding:0 6px;color:var(--color-text-secondary)">100%</span>
+        <button style="font-size:14px;width:28px;height:28px;border:none;background:transparent;cursor:pointer;border-radius:6px;color:var(--color-text-secondary)">+</button>
+      </div>
+
+      <!-- Validation badge -->
+      <div style="position:absolute;top:10px;right:12px;background:#EAF3DE;border:0.5px solid #639922;border-radius:6px;padding:4px 10px;font-size:11px;color:#3B6D11;font-weight:500">✓ 4 elements · 5 associations · Valid</div>
+    </div>
+
+    <!-- Right panel: properties -->
+    <div style="width:200px;border-left:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);overflow-y:auto;padding:12px;font-size:12px">
+      <div style="font-weight:500;font-size:12px;color:var(--color-text-primary);margin-bottom:10px;padding-bottom:8px;border-bottom:0.5px solid var(--color-border-tertiary)">Properties</div>
+      <div style="color:var(--color-text-secondary);margin-bottom:2px">Type</div>
+      <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:6px;padding:5px 8px;margin-bottom:10px;color:var(--color-text-primary)">Use Case</div>
+      <div style="color:var(--color-text-secondary);margin-bottom:2px">Name</div>
+      <input value="View Medical Records" style="width:100%;box-sizing:border-box;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:6px;padding:5px 8px;margin-bottom:10px;font-size:12px;color:var(--color-text-primary)"/>
+      <div style="color:var(--color-text-secondary);margin-bottom:2px">Stereotype</div>
+      <input value="" placeholder="optional" style="width:100%;box-sizing:border-box;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:6px;padding:5px 8px;margin-bottom:10px;font-size:12px;color:var(--color-text-primary)"/>
+
+      <div style="font-weight:500;font-size:12px;color:var(--color-text-primary);margin:12px 0 8px;padding-top:8px;border-top:0.5px solid var(--color-border-tertiary)">Style</div>
+      <div style="color:var(--color-text-secondary);margin-bottom:2px">Fill</div>
+      <div style="display:flex;gap:4px;margin-bottom:10px">
+        <div style="width:20px;height:20px;border-radius:4px;background:#E6F1FB;border:0.5px solid #378ADD;cursor:pointer"></div>
+        <div style="width:20px;height:20px;border-radius:4px;background:#E1F5EE;border:0.5px solid var(--color-border-tertiary);cursor:pointer"></div>
+        <div style="width:20px;height:20px;border-radius:4px;background:#FAEEDA;border:0.5px solid var(--color-border-tertiary);cursor:pointer"></div>
+        <div style="width:20px;height:20px;border-radius:4px;background:#EEEDFE;border:0.5px solid var(--color-border-tertiary);cursor:pointer"></div>
+      </div>
+      <div style="color:var(--color-text-secondary);margin-bottom:2px">Border</div>
+      <select style="width:100%;box-sizing:border-box;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:6px;padding:5px 8px;margin-bottom:10px;font-size:12px">
+        <option>Solid</option><option>Dashed</option>
+      </select>
+
+      <div style="font-weight:500;font-size:12px;color:var(--color-text-primary);margin:12px 0 8px;padding-top:8px;border-top:0.5px solid var(--color-border-tertiary)">UML Notes</div>
+      <textarea rows="3" placeholder="Add notes..." style="width:100%;box-sizing:border-box;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:6px;padding:5px 8px;font-size:12px;resize:none;color:var(--color-text-primary)"></textarea>
+
+      <div style="margin-top:12px;padding-top:8px;border-top:0.5px solid var(--color-border-tertiary)">
+        <div style="font-weight:500;font-size:12px;color:var(--color-text-primary);margin-bottom:8px">CASE Actions</div>
+        <button onclick="sendPrompt('Explain what code would be generated from this use case diagram')" style="width:100%;font-size:11px;padding:7px;border-radius:6px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);cursor:pointer;margin-bottom:4px;color:var(--color-text-primary)">Generate code stub ↗</button>
+        <button onclick="sendPrompt('What UML rules should I check for this diagram?')" style="width:100%;font-size:11px;padding:7px;border-radius:6px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);cursor:pointer;color:var(--color-text-primary)">Validate diagram ↗</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Status bar -->
+  <div style="height:28px;border-top:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);display:flex;align-items:center;padding:0 12px;gap:16px;font-size:11px;color:var(--color-text-secondary)">
+    <span>x: 144, y: 165</span>
+    <span>|</span>
+    <span>Selected: Use Case "View Medical Records"</span>
+    <span style="flex:1"></span>
+    <span>Auto-saved 2s ago</span>
+  </div>
+</div>
+<script>
+function switchTab(name) {
+  const tabs = ['scenario','logical','dev','process','physical'];
+  tabs.forEach(t => {
+    const el = document.getElementById('tab-'+t);
+    if(el) {
+      el.style.background = t===name ? '#EEEDFE' : 'transparent';
+      el.style.color = t===name ? '#534AB7' : 'var(--color-text-secondary)';
+      el.style.border = t===name ? '0.5px solid #AFA9EC' : '0.5px solid transparent';
+      el.style.fontWeight = t===name ? '500' : '400';
+    }
+  });
+}
+</script>

@@ -1,0 +1,133 @@
+
+<div style="font-family:var(--font-sans);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;background:var(--color-background-primary)">
+
+  <!-- Top nav -->
+  <div style="display:flex;align-items:center;padding:0 20px;height:52px;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary)">
+    <div style="font-size:16px;font-weight:500;color:var(--color-text-primary);margin-right:24px">ODT</div>
+    <div style="display:flex;gap:4px;flex:1">
+      <div style="font-size:13px;padding:5px 14px;border-radius:6px;background:#EEEDFE;color:#534AB7;font-weight:500;cursor:pointer">My Projects</div>
+      <div style="font-size:13px;padding:5px 14px;border-radius:6px;background:transparent;color:var(--color-text-secondary);cursor:pointer">Shared</div>
+      <div style="font-size:13px;padding:5px 14px;border-radius:6px;background:transparent;color:var(--color-text-secondary);cursor:pointer">Templates</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <input placeholder="Search projects..." style="font-size:12px;padding:5px 12px;border-radius:8px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);width:180px;color:var(--color-text-primary)"/>
+      <div style="width:32px;height:32px;border-radius:50%;background:#CECBF6;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#3C3489">AH</div>
+    </div>
+  </div>
+
+  <div style="padding:24px">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;margin-bottom:20px">
+      <div>
+        <div style="font-size:18px;font-weight:500;color:var(--color-text-primary)">My Projects</div>
+        <div style="font-size:13px;color:var(--color-text-secondary);margin-top:2px">6 projects · 3 with active collaborators</div>
+      </div>
+      <div style="flex:1"></div>
+      <button style="font-size:13px;padding:8px 18px;border-radius:8px;border:none;background:#534AB7;color:#fff;cursor:pointer;font-weight:500">+ New Project</button>
+    </div>
+
+    <!-- Stats row -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px">
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:14px 16px">
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">Total Diagrams</div>
+        <div style="font-size:22px;font-weight:500;color:var(--color-text-primary)">47</div>
+      </div>
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:14px 16px">
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">Collaborators</div>
+        <div style="font-size:22px;font-weight:500;color:var(--color-text-primary)">5</div>
+      </div>
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:14px 16px">
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">Exports This Month</div>
+        <div style="font-size:22px;font-weight:500;color:var(--color-text-primary)">12</div>
+      </div>
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:14px 16px">
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">Validation Errors</div>
+        <div style="font-size:22px;font-weight:500;color:#A32D2D">3</div>
+      </div>
+    </div>
+
+    <!-- Project cards grid -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+
+      <!-- Card 1 -->
+      <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;cursor:pointer">
+        <div style="height:110px;background:#EEEDFE;display:flex;align-items:center;justify-content:center;position:relative">
+          <!-- mini diagram preview -->
+          <svg width="140" height="90" viewBox="0 0 140 90">
+            <rect x="10" y="10" width="50" height="40" rx="4" fill="#fff" stroke="#AFA9EC" stroke-width="1"/>
+            <text x="35" y="25" text-anchor="middle" font-size="8" fill="#3C3489" font-family="sans-serif" font-weight="500">Patient</text>
+            <line x1="35" y1="28" x2="35" y2="33" stroke="#AFA9EC" stroke-width="0.8"/>
+            <text x="35" y="41" text-anchor="middle" font-size="7" fill="#534AB7" font-family="sans-serif">+patientId</text>
+            <rect x="80" y="10" width="50" height="40" rx="4" fill="#fff" stroke="#AFA9EC" stroke-width="1"/>
+            <text x="105" y="25" text-anchor="middle" font-size="8" fill="#3C3489" font-family="sans-serif" font-weight="500">Doctor</text>
+            <line x1="105" y1="28" x2="105" y2="33" stroke="#AFA9EC" stroke-width="0.8"/>
+            <text x="105" y="41" text-anchor="middle" font-size="7" fill="#534AB7" font-family="sans-serif">+doctorId</text>
+            <line x1="60" y1="30" x2="80" y2="30" stroke="#534AB7" stroke-width="1"/>
+            <polygon points="76,27 80,30 76,33" fill="#534AB7"/>
+            <rect x="35" y="65" width="70" height="20" rx="4" fill="#fff" stroke="#AFA9EC" stroke-width="1"/>
+            <text x="70" y="79" text-anchor="middle" font-size="8" fill="#3C3489" font-family="sans-serif" font-weight="500">Appointment</text>
+          </svg>
+          <div style="position:absolute;top:8px;right:8px;background:#534AB7;color:#fff;font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500">Class</div>
+        </div>
+        <div style="padding:12px">
+          <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px">Hospital Mgmt System</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px">8 diagrams · All 4+1 views</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="display:flex;margin-right:4px">
+              <div style="width:18px;height:18px;border-radius:50%;background:#CECBF6;font-size:9px;display:flex;align-items:center;justify-content:center;color:#3C3489;border:1px solid #fff;margin-right:-4px">AH</div>
+              <div style="width:18px;height:18px;border-radius:50%;background:#9FE1CB;font-size:9px;display:flex;align-items:center;justify-content:center;color:#085041;border:1px solid #fff">SA</div>
+            </div>
+            <div style="font-size:10px;color:var(--color-text-secondary);flex:1">2h ago</div>
+            <div style="background:#EAF3DE;color:#3B6D11;font-size:10px;padding:2px 6px;border-radius:4px">✓ Valid</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;cursor:pointer">
+        <div style="height:110px;background:#E1F5EE;display:flex;align-items:center;justify-content:center;position:relative">
+          <svg width="140" height="90" viewBox="0 0 140 90">
+            <rect x="15" y="5" width="110" height="22" rx="3" fill="#fff" stroke="#1D9E75" stroke-width="1"/>
+            <text x="70" y="19" text-anchor="middle" font-size="8" fill="#085041" font-family="sans-serif" font-weight="500">Presentation Layer</text>
+            <rect x="15" y="32" width="110" height="22" rx="3" fill="#fff" stroke="#1D9E75" stroke-width="1"/>
+            <text x="70" y="46" text-anchor="middle" font-size="8" fill="#085041" font-family="sans-serif" font-weight="500">Business Logic Layer</text>
+            <rect x="15" y="59" width="110" height="22" rx="3" fill="#fff" stroke="#1D9E75" stroke-width="1"/>
+            <text x="70" y="73" text-anchor="middle" font-size="8" fill="#085041" font-family="sans-serif" font-weight="500">Data Access Layer</text>
+          </svg>
+          <div style="position:absolute;top:8px;right:8px;background:#0F6E56;color:#fff;font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500">Architecture</div>
+        </div>
+        <div style="padding:12px">
+          <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px">E-Commerce Platform</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px">5 diagrams · Layered style</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:18px;height:18px;border-radius:50%;background:#CECBF6;font-size:9px;display:flex;align-items:center;justify-content:center;color:#3C3489">AH</div>
+            <div style="font-size:10px;color:var(--color-text-secondary);flex:1;margin-left:6px">Yesterday</div>
+            <div style="background:#FCEBEB;color:#A32D2D;font-size:10px;padding:2px 6px;border-radius:4px">2 errors</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Template -->
+      <div style="background:var(--color-background-secondary);border:0.5px dashed var(--color-border-secondary);border-radius:var(--border-radius-lg);overflow:hidden;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:186px">
+        <div style="font-size:28px;color:var(--color-text-secondary);margin-bottom:8px">+</div>
+        <div style="font-size:13px;font-weight:500;color:var(--color-text-secondary)">New Project</div>
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-top:4px">From template or blank</div>
+      </div>
+
+    </div>
+
+    <!-- Templates section -->
+    <div style="margin-top:24px">
+      <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:12px">Architecture Templates</div>
+      <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:4px">
+        <div style="flex-shrink:0;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 16px;font-size:12px;cursor:pointer;color:var(--color-text-secondary)">MVC Pattern</div>
+        <div style="flex-shrink:0;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 16px;font-size:12px;cursor:pointer;color:var(--color-text-secondary)">Layered (4-tier)</div>
+        <div style="flex-shrink:0;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 16px;font-size:12px;cursor:pointer;color:var(--color-text-secondary)">Client-Server</div>
+        <div style="flex-shrink:0;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 16px;font-size:12px;cursor:pointer;color:var(--color-text-secondary)">Pipe &amp; Filter</div>
+        <div style="flex-shrink:0;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 16px;font-size:12px;cursor:pointer;color:var(--color-text-secondary)">SOA / Microservices</div>
+        <div style="flex-shrink:0;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 16px;font-size:12px;cursor:pointer;color:var(--color-text-secondary)">Component-Based</div>
+        <div style="flex-shrink:0;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 16px;font-size:12px;cursor:pointer;color:var(--color-text-secondary)">4+1 View Blank</div>
+      </div>
+    </div>
+  </div>
+</div>
