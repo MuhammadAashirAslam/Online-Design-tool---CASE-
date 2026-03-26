@@ -130,6 +130,9 @@ export default function Editor() {
     const defaults: Record<string, Partial<DiagramElement>> = {
       'class-box': { width: 160, height: 120, fill: '#E6F1FB', stroke: '#378ADD', label: 'NewClass', attributes: [{ visibility: '+', name: 'attribute', type: 'String' }], methods: [{ visibility: '+', name: 'method', returnType: 'void', params: '' }] },
       'actor': { width: 50, height: 90, fill: 'transparent', stroke: '#6B6B80', label: 'Actor' },
+      'actor-user': { width: 50, height: 90, fill: 'transparent', stroke: '#6B6B80', label: 'User' },
+      'actor-admin': { width: 50, height: 90, fill: 'transparent', stroke: '#6B6B80', label: 'Admin' },
+      'actor-system': { width: 50, height: 90, fill: 'transparent', stroke: '#6B6B80', label: 'External System' },
       'usecase': { width: 160, height: 60, fill: '#E6F1FB', stroke: '#378ADD', label: 'Use Case' },
       'component': { width: 140, height: 80, fill: '#E1F5EE', stroke: '#1D9E75', label: 'Component' },
       'node': { width: 140, height: 90, fill: '#FAEEDA', stroke: '#B8860B', label: 'Node' },

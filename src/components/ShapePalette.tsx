@@ -37,6 +37,45 @@ const TOOL_ICONS: Record<string, { label: string; icon: ReactNode }> = {
       </svg>
     ),
   },
+  'actor-user': {
+    label: 'User Actor',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20">
+        <circle cx="10" cy="4" r="2.5" fill="none" stroke="currentColor" strokeWidth="1.2" />
+        <line x1="10" y1="6.5" x2="10" y2="14" stroke="currentColor" strokeWidth="1.2" />
+        <line x1="5" y1="10" x2="15" y2="10" stroke="currentColor" strokeWidth="1.2" />
+        <line x1="10" y1="14" x2="6" y2="18" stroke="currentColor" strokeWidth="1.2" />
+        <line x1="10" y1="14" x2="14" y2="18" stroke="currentColor" strokeWidth="1.2" />
+        <circle cx="15.8" cy="4.2" r="1.4" fill="none" stroke="currentColor" strokeWidth="1" />
+      </svg>
+    ),
+  },
+  'actor-admin': {
+    label: 'Admin Actor',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20">
+        <circle cx="10" cy="4" r="2.5" fill="none" stroke="currentColor" strokeWidth="1.2" />
+        <line x1="10" y1="6.5" x2="10" y2="14" stroke="currentColor" strokeWidth="1.2" />
+        <line x1="5" y1="10" x2="15" y2="10" stroke="currentColor" strokeWidth="1.2" />
+        <line x1="10" y1="14" x2="6" y2="18" stroke="currentColor" strokeWidth="1.2" />
+        <line x1="10" y1="14" x2="14" y2="18" stroke="currentColor" strokeWidth="1.2" />
+        <path d="M10 0.8L11.2 2.4L13.2 2.2L12.4 4L13.7 5.5L11.8 5.8L10.8 7.4L10 5.8L8.2 5.5L9.5 4L8.7 2.2L10.7 2.4Z" fill="none" stroke="currentColor" strokeWidth="0.9" />
+      </svg>
+    ),
+  },
+  'actor-system': {
+    label: 'System Actor',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20">
+        <circle cx="10" cy="4" r="2.5" fill="none" stroke="currentColor" strokeWidth="1.2" />
+        <line x1="10" y1="6.5" x2="10" y2="14" stroke="currentColor" strokeWidth="1.2" />
+        <line x1="5" y1="10" x2="15" y2="10" stroke="currentColor" strokeWidth="1.2" />
+        <line x1="10" y1="14" x2="6" y2="18" stroke="currentColor" strokeWidth="1.2" />
+        <line x1="10" y1="14" x2="14" y2="18" stroke="currentColor" strokeWidth="1.2" />
+        <rect x="14.2" y="1.4" width="4.2" height="4.2" rx="0.6" fill="none" stroke="currentColor" strokeWidth="1" />
+      </svg>
+    ),
+  },
   'usecase': {
     label: 'Use Case',
     icon: (

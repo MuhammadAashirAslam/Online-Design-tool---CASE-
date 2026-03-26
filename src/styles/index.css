@@ -19,7 +19,8 @@
   --bg-primary:    #FFFFFF;
   --bg-secondary:  #F8F8FA;
   --bg-tertiary:   #F0F0F3;
-  --bg-canvas:     #FAFAFA;
+  --bg-canvas:     #EEF3FB;
+  --canvas-grid-dot: #B9C6D8;
 
   --text-primary:   #1A1A2E;
   --text-secondary: #6B6B80;
@@ -83,7 +84,8 @@
     --bg-primary:    #0F0F1A;
     --bg-secondary:  #161625;
     --bg-tertiary:   #1E1E30;
-    --bg-canvas:     #121220;
+    --bg-canvas:     #1A2235;
+    --canvas-grid-dot: #4A5A78;
 
     --text-primary:   #E8E8F0;
     --text-secondary: #9090A8;

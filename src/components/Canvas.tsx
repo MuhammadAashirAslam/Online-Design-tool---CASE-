@@ -163,11 +163,8 @@ const Canvas = forwardRef<SVGSVGElement, CanvasProps>(({
       }
 
       setHoverTargetId(best?.id || null);
-    } else {
-      const hoveredEl = [...elements].reverse().find(el =>
-        pos.x >= el.x && pos.x <= el.x + el.width && pos.y >= el.y && pos.y <= el.y + el.height
-      );
-      setHoverTargetId(hoveredEl?.id || null);
+    } else if (hoverTargetId) {
+      setHoverTargetId(null);
     }
   };
 
@@ -324,7 +321,7 @@ const Canvas = forwardRef<SVGSVGElement, CanvasProps>(({
         </marker>
         {/* Dot grid pattern */}
         <pattern id="dotGrid" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-          <circle cx="1" cy="1" r="0.8" fill="#ccc" />
+          <circle cx="1" cy="1" r="0.8" fill="var(--canvas-grid-dot, #B9C6D8)" />
         </pattern>
       </defs>
     );
@@ -339,7 +336,13 @@ const Canvas = forwardRef<SVGSVGElement, CanvasProps>(({
       case 'class-box':
         return renderClassBox(el, isSelected, isConnectingSource);
       case 'actor':
-        return renderActor(el, isSelected, isConnectingSource);
+        return renderActor(el, isSelected, isConnectingSource, 'default');
+      case 'actor-user':
+        return renderActor(el, isSelected, isConnectingSource, 'user');
+      case 'actor-admin':
+        return renderActor(el, isSelected, isConnectingSource, 'admin');
+      case 'actor-system':
+        return renderActor(el, isSelected, isConnectingSource, 'system');
       case 'usecase':
         return renderUseCase(el, isSelected, isConnectingSource);
       case 'component':
@@ -407,7 +410,12 @@ const Canvas = forwardRef<SVGSVGElement, CanvasProps>(({
     );
   }
 
-  function renderActor(el: DiagramElement, isSelected: boolean, isConnSrc: boolean) {
+  function renderActor(
+    el: DiagramElement,
+    isSelected: boolean,
+    isConnSrc: boolean,
+    variant: 'default' | 'user' | 'admin' | 'system',
+  ) {
     const cx = el.x + el.width / 2;
     const headR = 10;
     const headY = el.y + headR + 4;
@@ -424,6 +432,20 @@ const Canvas = forwardRef<SVGSVGElement, CanvasProps>(({
         <line x1={cx - legSpread} y1={armY} x2={cx + legSpread} y2={armY} stroke={s} strokeWidth="1.5" />
         <line x1={cx} y1={bodyBottomY} x2={cx - legSpread} y2={bodyBottomY + 20} stroke={s} strokeWidth="1.5" />
         <line x1={cx} y1={bodyBottomY} x2={cx + legSpread} y2={bodyBottomY + 20} stroke={s} strokeWidth="1.5" />
+        {variant === 'user' && (
+          <circle cx={cx + 14} cy={headY - 8} r={4.5} fill="none" stroke={s} strokeWidth="1" />
+        )}
+        {variant === 'admin' && (
+          <path
+            d={`M${cx} ${headY - 16} L${cx + 4} ${headY - 10} L${cx + 9} ${headY - 11} L${cx + 7} ${headY - 6} L${cx + 11} ${headY - 2} L${cx + 6} ${headY - 1} L${cx + 3} ${headY + 4} L${cx} ${headY} L${cx - 3} ${headY + 4} L${cx - 6} ${headY - 1} L${cx - 11} ${headY - 2} L${cx - 7} ${headY - 6} L${cx - 9} ${headY - 11} L${cx - 4} ${headY - 10} Z`}
+            fill="none"
+            stroke={s}
+            strokeWidth="0.9"
+          />
+        )}
+        {variant === 'system' && (
+          <rect x={cx + 8} y={headY - 12} width={10} height={10} rx={1.5} fill="none" stroke={s} strokeWidth="1" />
+        )}
         <text x={cx} y={el.y + el.height - 2} textAnchor="middle" fontSize="11"
           fill="#1A1A2E" fontFamily="Inter, sans-serif">{el.label}</text>
       </g>
@@ -611,42 +633,40 @@ const Canvas = forwardRef<SVGSVGElement, CanvasProps>(({
     if (!source) return null;
 
     const targetEl = hoverTargetId ? elements.find(e => e.id === hoverTargetId) : undefined;
-    
-    let targetPoint = mouseCanvasPos;
-    if (targetEl) {
-      const cx = targetEl.x + targetEl.width / 2;
-      const cy = targetEl.y + targetEl.height / 2;
-      const hardpoints = [
-        { x: cx, y: targetEl.y },
-        { x: cx, y: targetEl.y + targetEl.height },
-        { x: targetEl.x, y: cy },
-        { x: targetEl.x + targetEl.width, y: cy }
-      ];
-      let minD = Infinity;
-      let bestHp = hardpoints[0];
-      for (const hp of hardpoints) {
-        const d = Math.hypot(hp.x - mouseCanvasPos.x, hp.y - mouseCanvasPos.y);
-        if (d < minD) {
-          minD = d;
-          bestHp = hp;
-        }
-      }
-      targetPoint = bestHp;
-    }
+    const targetPoint = targetEl
+      ? getCenterPoint(targetEl)
+      : mouseCanvasPos;
 
     const isAssociation = activeTool === 'association';
-    
     const sp = isAssociation
       ? getPerimeterPoint(source, targetPoint.x, targetPoint.y)
       : getEdgePoint(source, targetPoint.x, targetPoint.y);
 
-    const ep = targetPoint;
+    const ep = targetEl
+      ? (isAssociation
+        ? getPerimeterPoint(targetEl, sp.x, sp.y)
+        : getEdgePoint(targetEl, sp.x, sp.y))
+      : targetPoint;
 
     const isDashed = ['dependency', 'realization', 'include', 'extend'].includes(activeTool);
     const markerId = `url(#arrow-${activeTool})`;
 
     return (
       <g pointerEvents="none">
+        {targetEl && (
+          <rect
+            x={targetEl.x - 5}
+            y={targetEl.y - 5}
+            width={targetEl.width + 10}
+            height={targetEl.height + 10}
+            rx={8}
+            fill="none"
+            stroke="#534AB7"
+            strokeWidth={1.5}
+            strokeDasharray="6 3"
+            opacity={0.8}
+          />
+        )}
         <line
           x1={sp.x}
           y1={sp.y}
@@ -696,11 +716,10 @@ const Canvas = forwardRef<SVGSVGElement, CanvasProps>(({
           {elements.map(el => {
             const isSelected = el.id === selectedId;
             const isConnectingSource = el.id === connectingFrom;
-            const isHoverTarget = el.id === hoverTargetId;
-            const isConnectorTool = connectorTools.includes(activeTool);
+            const isConnectorTool = ['association', 'inheritance', 'realization', 'dependency', 'aggregation', 'composition', 'include', 'extend'].includes(activeTool);
             
-            // Show hardpoints if element is selected, hovered, or connecting source
-            if (!isSelected && !isConnectingSource && !isHoverTarget) return null;
+            // Only show hardpoints if element is selected, or if we are using a connector tool
+            if (!isSelected && !isConnectorTool && !isConnectingSource) return null;
 
             const cx = el.x + el.width / 2;
             const cy = el.y + el.height / 2;
@@ -711,37 +730,20 @@ const Canvas = forwardRef<SVGSVGElement, CanvasProps>(({
               { x: el.x + el.width, y: cy }      // Right
             ];
 
-            // If actively snapping to this element, highlight the closest hardpoint
-            let activeHpIndex = -1;
-            if (isConnectorTool && connectingFrom && isHoverTarget && mouseCanvasPos) {
-              let minD = Infinity;
-              hardpoints.forEach((p, i) => {
-                const d = Math.hypot(p.x - mouseCanvasPos.x, p.y - mouseCanvasPos.y);
-                if (d < minD) {
-                  minD = d;
-                  activeHpIndex = i;
-                }
-              });
-            }
-
             return (
               <g key={`hp-${el.id}`}>
-                {hardpoints.map((p, i) => {
-                  const isActive = i === activeHpIndex;
-                  return (
-                    <circle
-                      key={i}
-                      cx={p.x}
-                      cy={p.y}
-                      r={isActive ? 6 : 3.5}
-                      fill={isActive ? '#10b981' : 'none'}
-                      stroke={isActive ? '#fff' : '#534AB7'}
-                      strokeWidth={isActive ? 2 : 1.5}
-                      opacity={isActive ? 1 : 0.6}
-                      style={{ pointerEvents: 'none', transition: 'all 0.15s ease' }}
-                    />
-                  );
-                })}
+                {hardpoints.map((p, i) => (
+                  <circle
+                    key={i}
+                    cx={p.x}
+                    cy={p.y}
+                    r={3.5}
+                    fill="#534AB7"
+                    stroke="#fff"
+                    strokeWidth={1.5}
+                    style={{ pointerEvents: 'none' }}
+                  />
+                ))}
               </g>
             );
           })}

@@ -9,7 +9,7 @@ export interface ViewTemplate {
 type ViewToolMap = Record<ViewType, ActiveTool[]>;
 
 const DEFAULT_VIEW_TOOLS: ViewToolMap = {
-  scenario: ['select', 'actor', 'usecase', 'association', 'include', 'extend', 'note'],
+  scenario: ['select', 'actor', 'actor-user', 'actor-admin', 'actor-system', 'usecase', 'association', 'include', 'extend', 'note'],
   logical: ['select', 'class-box', 'interface', 'object', 'association', 'inheritance', 'realization', 'aggregation', 'composition', 'dependency', 'note'],
   development: ['select', 'component', 'package', 'interface', 'association', 'dependency', 'realization', 'note'],
   process: ['select', 'activity', 'state', 'association', 'dependency', 'note'],
@@ -70,42 +70,42 @@ const ARCH_VIEW_TEMPLATES: Record<ArchStyle, ViewTemplate[]> = {
 
 const ARCH_VIEW_TOOLS: Partial<Record<ArchStyle, ViewToolMap>> = {
   mvc: {
-    scenario: ['select', 'actor', 'usecase', 'association', 'include', 'extend', 'note'],
+    scenario: ['select', 'actor', 'actor-user', 'actor-admin', 'actor-system', 'usecase', 'association', 'include', 'extend', 'note'],
     logical: ['select', 'class-box', 'interface', 'object', 'association', 'inheritance', 'dependency', 'aggregation', 'composition', 'note'],
     development: ['select', 'component', 'package', 'interface', 'association', 'dependency', 'realization', 'note'],
     process: ['select', 'activity', 'state', 'association', 'dependency', 'note'],
     physical: ['select', 'node', 'component', 'association', 'dependency', 'note'],
   },
   layered: {
-    scenario: ['select', 'actor', 'usecase', 'association', 'include', 'extend', 'note'],
+    scenario: ['select', 'actor', 'actor-user', 'actor-admin', 'actor-system', 'usecase', 'association', 'include', 'extend', 'note'],
     logical: ['select', 'class-box', 'package', 'interface', 'association', 'dependency', 'composition', 'note'],
     development: ['select', 'package', 'component', 'interface', 'association', 'dependency', 'realization', 'note'],
     process: ['select', 'activity', 'state', 'dependency', 'note'],
     physical: ['select', 'node', 'component', 'association', 'dependency', 'note'],
   },
   'client-server': {
-    scenario: ['select', 'actor', 'usecase', 'association', 'include', 'extend', 'note'],
+    scenario: ['select', 'actor', 'actor-user', 'actor-admin', 'actor-system', 'usecase', 'association', 'include', 'extend', 'note'],
     logical: ['select', 'class-box', 'interface', 'object', 'association', 'dependency', 'note'],
     development: ['select', 'component', 'package', 'interface', 'association', 'dependency', 'realization', 'note'],
     process: ['select', 'activity', 'state', 'association', 'dependency', 'note'],
     physical: ['select', 'node', 'component', 'association', 'dependency', 'note'],
   },
   'pipe-filter': {
-    scenario: ['select', 'actor', 'usecase', 'association', 'include', 'extend', 'note'],
+    scenario: ['select', 'actor', 'actor-user', 'actor-admin', 'actor-system', 'usecase', 'association', 'include', 'extend', 'note'],
     logical: ['select', 'component', 'interface', 'association', 'dependency', 'note'],
     development: ['select', 'component', 'package', 'interface', 'association', 'dependency', 'realization', 'note'],
     process: ['select', 'activity', 'state', 'association', 'dependency', 'note'],
     physical: ['select', 'node', 'component', 'dependency', 'note'],
   },
   soa: {
-    scenario: ['select', 'actor', 'usecase', 'association', 'include', 'extend', 'note'],
+    scenario: ['select', 'actor', 'actor-user', 'actor-admin', 'actor-system', 'usecase', 'association', 'include', 'extend', 'note'],
     logical: ['select', 'component', 'interface', 'package', 'association', 'dependency', 'realization', 'note'],
     development: ['select', 'component', 'package', 'interface', 'association', 'dependency', 'realization', 'note'],
     process: ['select', 'activity', 'state', 'association', 'dependency', 'note'],
     physical: ['select', 'node', 'component', 'association', 'dependency', 'note'],
   },
   'component-based': {
-    scenario: ['select', 'actor', 'usecase', 'association', 'include', 'extend', 'note'],
+    scenario: ['select', 'actor', 'actor-user', 'actor-admin', 'actor-system', 'usecase', 'association', 'include', 'extend', 'note'],
     logical: ['select', 'component', 'interface', 'class-box', 'package', 'association', 'realization', 'aggregation', 'composition', 'dependency', 'note'],
     development: ['select', 'component', 'package', 'interface', 'association', 'dependency', 'realization', 'note'],
     process: ['select', 'activity', 'state', 'dependency', 'note'],

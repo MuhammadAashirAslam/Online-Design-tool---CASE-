@@ -30,6 +30,9 @@ export type ViewType =
 export type ElementType =
   | 'class-box'
   | 'actor'
+  | 'actor-user'
+  | 'actor-admin'
+  | 'actor-system'
   | 'usecase'
   | 'component'
   | 'node'

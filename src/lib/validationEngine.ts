@@ -13,6 +13,7 @@ export function validateDiagram(
   umlType: string
 ): ValidationError[] {
   const errors: ValidationError[] = [];
+  const actorTypes = new Set(['actor', 'actor-user', 'actor-admin', 'actor-system']);
 
   // ── General rules ──
   elements.forEach(el => {
@@ -142,7 +143,7 @@ export function validateDiagram(
 
   // ── Use case diagram rules ──
   if (umlType === 'usecase') {
-    const actors = elements.filter(e => e.element_type === 'actor');
+    const actors = elements.filter(e => actorTypes.has(e.element_type));
     const useCases = elements.filter(e => e.element_type === 'usecase');
 
     // Actors must connect to at least one use case
