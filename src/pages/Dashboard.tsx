@@ -31,12 +31,14 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
   const [newArch, setNewArch] = useState<ArchStyle>('custom');
   const [activeTab, setActiveTab] = useState<'projects' | 'templates'>('projects');
   const templatesSectionRef = useRef<HTMLElement | null>(null);
   const mainRef = useRef<HTMLElement | null>(null);
+  const createLockRef = useRef(false);
 
   const initials = user?.user_metadata?.username
     ? user.user_metadata.username.slice(0, 2).toUpperCase()
@@ -57,65 +59,76 @@ export default function Dashboard() {
   }, [isGuest]);
 
   async function createProject() {
-    if (!newName.trim()) return;
+    if (!newName.trim() || createLockRef.current) return;
 
-    const projectId = uuidv4();
-    const p: Project = {
-      id: projectId,
-      owner_id: user?.id || 'guest',
-      name: newName.trim(),
-      arch_style: newArch,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
+    createLockRef.current = true;
+    setCreating(true);
 
-    // Create architecture-specific 4+1 diagrams
-    const viewTemplates = getViewTemplatesByArchStyle(newArch);
-    const diagrams = viewTemplates.map((tpl) => ({
-      id: uuidv4(),
-      project_id: projectId,
-      name: tpl.name,
-      uml_type: tpl.umlType,
-      view_type: tpl.view,
-      is_valid: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }));
+    try {
 
-    if (isGuest) {
-      // Guest mode: localStorage
-      const updated = [p, ...projects];
-      setProjects(updated);
-      saveProjectsLocal(updated);
-      localStorage.setItem(`odt_diagrams_${projectId}`, JSON.stringify(diagrams));
+      const projectId = uuidv4();
+      const p: Project = {
+        id: projectId,
+        owner_id: user?.id || 'guest',
+        name: newName.trim(),
+        arch_style: newArch,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
 
-      diagrams.forEach((diag) => {
-        const seed = getTemplateSeed(newArch, diag);
-        localStorage.setItem(`odt_elements_${projectId}_${diag.id}`, JSON.stringify(seed.elements));
-        localStorage.setItem(`odt_connectors_${projectId}_${diag.id}`, JSON.stringify(seed.connectors));
-      });
-    } else {
-      // Authenticated: Supabase
-      const created = await db.createProject(p);
-      if (!created) return;
+      // Create architecture-specific 4+1 diagrams
+      const viewTemplates = getViewTemplatesByArchStyle(newArch);
+      const diagrams = viewTemplates.map((tpl) => ({
+        id: uuidv4(),
+        project_id: projectId,
+        name: tpl.name,
+        uml_type: tpl.umlType,
+        view_type: tpl.view,
+        is_valid: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }));
 
-      await db.createDiagrams(diagrams);
+      if (isGuest) {
+        // Guest mode: localStorage
+        const updated = projects.some(existing => existing.id === p.id)
+          ? projects
+          : [p, ...projects];
+        setProjects(updated);
+        saveProjectsLocal(updated);
+        localStorage.setItem(`odt_diagrams_${projectId}`, JSON.stringify(diagrams));
 
-      // Seed diagram content
-      for (const diag of diagrams) {
-        const seed = getTemplateSeed(newArch, diag);
-        if (seed.elements.length > 0 || seed.connectors.length > 0) {
-          await db.seedDiagramData(diag.id, seed.elements, seed.connectors);
+        diagrams.forEach((diag) => {
+          const seed = getTemplateSeed(newArch, diag);
+          localStorage.setItem(`odt_elements_${projectId}_${diag.id}`, JSON.stringify(seed.elements));
+          localStorage.setItem(`odt_connectors_${projectId}_${diag.id}`, JSON.stringify(seed.connectors));
+        });
+      } else {
+        // Authenticated: Supabase
+        const created = await db.createProject(p);
+        if (!created) return;
+
+        await db.createDiagrams(diagrams);
+
+        // Seed diagram content
+        for (const diag of diagrams) {
+          const seed = getTemplateSeed(newArch, diag);
+          if (seed.elements.length > 0 || seed.connectors.length > 0) {
+            await db.seedDiagramData(diag.id, seed.elements, seed.connectors);
+          }
         }
+
+        setProjects(prev => prev.some(existing => existing.id === created.id) ? prev : [created, ...prev]);
       }
 
-      setProjects(prev => [created, ...prev]);
+      setShowCreate(false);
+      setNewName('');
+      setNewArch('custom');
+      navigate(`/editor/${projectId}`);
+    } finally {
+      createLockRef.current = false;
+      setCreating(false);
     }
-
-    setShowCreate(false);
-    setNewName('');
-    setNewArch('custom');
-    navigate(`/editor/${projectId}`);
   }
 
   async function deleteProject(id: string) {
@@ -282,7 +295,12 @@ export default function Dashboard() {
             <h2>Create New Project</h2>
             <div style={{ marginBottom: 16 }}>
               <label className="label">Project Name</label>
-              <input className="input" placeholder="Hospital Management System" value={newName} onChange={e => setNewName(e.target.value)} autoFocus onKeyDown={e => e.key === 'Enter' && createProject()} />
+              <input className="input" placeholder="Hospital Management System" value={newName} onChange={e => setNewName(e.target.value)} autoFocus onKeyDown={e => {
+                if (e.key === 'Enter' && !e.repeat) {
+                  e.preventDefault();
+                  createProject();
+                }
+              }} />
             </div>
             <div style={{ marginBottom: 24 }}>
               <label className="label">Architecture Style</label>
@@ -292,8 +310,8 @@ export default function Dashboard() {
               </select>
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button className="btn btn-secondary" onClick={() => setShowCreate(false)}>Cancel</button>
-              <button className="btn btn-primary" onClick={createProject}>Create Project</button>
+              <button className="btn btn-secondary" onClick={() => setShowCreate(false)} disabled={creating}>Cancel</button>
+              <button className="btn btn-primary" onClick={createProject} disabled={creating || !newName.trim()}>{creating ? 'Creating...' : 'Create Project'}</button>
             </div>
           </div>
         </div>
