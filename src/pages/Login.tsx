@@ -7,7 +7,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, continueAsGuest } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -21,6 +21,11 @@ export default function Login() {
     } else {
       navigate('/');
     }
+  };
+
+  const handleGuest = () => {
+    continueAsGuest();
+    navigate('/');
   };
 
   return (
@@ -66,6 +71,14 @@ export default function Login() {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+
+        <button
+          className="btn btn-ghost"
+          onClick={handleGuest}
+          style={{ width: '100%', marginTop: 8, padding: '10px 0', fontSize: 13 }}
+        >
+          Continue as Guest →
+        </button>
 
         <div className="auth-link">
           Don't have an account? <Link to="/signup">Create one</Link>

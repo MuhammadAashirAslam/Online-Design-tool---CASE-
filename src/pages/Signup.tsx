@@ -8,7 +8,7 @@ export default function Signup() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp, continueAsGuest } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -26,6 +26,11 @@ export default function Signup() {
     } else {
       navigate('/');
     }
+  };
+
+  const handleGuest = () => {
+    continueAsGuest();
+    navigate('/');
   };
 
   return (
@@ -84,6 +89,14 @@ export default function Signup() {
             {loading ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
+
+        <button
+          className="btn btn-ghost"
+          onClick={handleGuest}
+          style={{ width: '100%', marginTop: 8, padding: '10px 0', fontSize: 13 }}
+        >
+          Continue as Guest →
+        </button>
 
         <div className="auth-link">
           Already have an account? <Link to="/login">Sign in</Link>
