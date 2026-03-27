@@ -31,8 +31,11 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
   const [creating, setCreating] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+  const [notice, setNotice] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [newName, setNewName] = useState('');
   const [newArch, setNewArch] = useState<ArchStyle>('custom');
   const [activeTab, setActiveTab] = useState<'projects' | 'templates'>('projects');
@@ -57,6 +60,12 @@ export default function Dashboard() {
     }
     load();
   }, [isGuest]);
+
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(null), 2800);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
 
   async function createProject() {
     if (!newName.trim() || createLockRef.current) return;
@@ -131,8 +140,14 @@ export default function Dashboard() {
     }
   }
 
-  async function deleteProject(id: string) {
-    if (!confirm('Delete this project and all its diagrams?')) return;
+  function requestDeleteProject(project: Project) {
+    setProjectToDelete(project);
+  }
+
+  async function deleteProject() {
+    if (!projectToDelete) return;
+    const id = projectToDelete.id;
+    setDeleting(true);
 
     if (isGuest) {
       const updated = projects.filter(p => p.id !== id);
@@ -145,12 +160,19 @@ export default function Dashboard() {
         localStorage.removeItem(`odt_connectors_${id}_${d.id}`);
       });
       localStorage.removeItem(`odt_diagrams_${id}`);
+      setNotice({ type: 'success', text: `Deleted "${projectToDelete.name}"` });
     } else {
       const ok = await db.deleteProject(id);
       if (ok) {
         setProjects(prev => prev.filter(p => p.id !== id));
+        setNotice({ type: 'success', text: `Deleted "${projectToDelete.name}"` });
+      } else {
+        setNotice({ type: 'error', text: 'Could not delete project. Please try again.' });
       }
     }
+
+    setDeleting(false);
+    setProjectToDelete(null);
   }
 
   function formatDate(dateStr: string) {
@@ -228,6 +250,12 @@ export default function Dashboard() {
           </button>
         </div>
 
+        {notice && (
+          <div className={`dash-alert ${notice.type === 'success' ? 'success' : 'error'}`} role="status" aria-live="polite">
+            {notice.text}
+          </div>
+        )}
+
         {/* Stats row */}
         <div className="stats-row">
           <div className="stat-card">
@@ -260,7 +288,7 @@ export default function Dashboard() {
                 <div className="project-card-title">{project.name}</div>
                 <div className="project-card-meta">{archLabel(project.arch_style)} · {formatDate(project.updated_at)}</div>
                 <div className="project-card-actions">
-                  <button className="btn btn-ghost btn-sm" onClick={e => { e.stopPropagation(); deleteProject(project.id); }}>Delete</button>
+                  <button className="btn btn-ghost btn-sm" onClick={e => { e.stopPropagation(); requestDeleteProject(project); }}>Delete</button>
                 </div>
               </div>
             </div>
@@ -312,6 +340,22 @@ export default function Dashboard() {
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button className="btn btn-secondary" onClick={() => setShowCreate(false)} disabled={creating}>Cancel</button>
               <button className="btn btn-primary" onClick={createProject} disabled={creating || !newName.trim()}>{creating ? 'Creating...' : 'Create Project'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {projectToDelete && (
+        <div className="modal-overlay" onClick={() => !deleting && setProjectToDelete(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h2>Delete Project?</h2>
+            <p className="dash-delete-copy">
+              This will permanently remove <strong>{projectToDelete.name}</strong> and all related diagrams.
+            </p>
+            <div className="dash-delete-note">This action cannot be undone.</div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20 }}>
+              <button className="btn btn-secondary" onClick={() => setProjectToDelete(null)} disabled={deleting}>Cancel</button>
+              <button className="btn btn-danger" onClick={deleteProject} disabled={deleting}>{deleting ? 'Deleting...' : 'Delete Project'}</button>
             </div>
           </div>
         </div>
