@@ -4,6 +4,8 @@ import { useAuth } from '../hooks/useAuth';
 import { Project, ArchStyle } from '../types';
 import { getViewTemplatesByArchStyle } from '../lib/architectureTemplates';
 import { getTemplateSeed } from '../lib/templateSeeds';
+import * as db from '../lib/supabaseData';
+import { v4 as uuidv4 } from 'uuid';
 import '../styles/dashboard.css';
 
 const ARCH_TEMPLATES: { label: string; value: ArchStyle }[] = [
@@ -15,11 +17,12 @@ const ARCH_TEMPLATES: { label: string; value: ArchStyle }[] = [
   { label: 'Component-Based', value: 'component-based' },
 ];
 
-function loadProjects(): Project[] {
+/* ── localStorage helpers (guest-only fallback) ── */
+function loadProjectsLocal(): Project[] {
   try { return JSON.parse(localStorage.getItem('odt_projects') || '[]'); }
   catch { return []; }
 }
-function saveProjects(projects: Project[]) {
+function saveProjectsLocal(projects: Project[]) {
   localStorage.setItem('odt_projects', JSON.stringify(projects));
 }
 
@@ -27,6 +30,7 @@ export default function Dashboard() {
   const { user, isGuest, signOut } = useAuth();
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
   const [newArch, setNewArch] = useState<ArchStyle>('custom');
@@ -38,27 +42,38 @@ export default function Dashboard() {
     ? user.user_metadata.username.slice(0, 2).toUpperCase()
     : 'G';
 
-  useEffect(() => { setProjects(loadProjects()); }, []);
+  // Load projects
+  useEffect(() => {
+    async function load() {
+      if (isGuest) {
+        setProjects(loadProjectsLocal());
+      } else {
+        const data = await db.fetchProjects();
+        setProjects(data);
+      }
+      setLoading(false);
+    }
+    load();
+  }, [isGuest]);
 
-  function createProject() {
+  async function createProject() {
     if (!newName.trim()) return;
+
+    const projectId = uuidv4();
     const p: Project = {
-      id: 'proj-' + Date.now(),
+      id: projectId,
       owner_id: user?.id || 'guest',
       name: newName.trim(),
       arch_style: newArch,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
-    const updated = [p, ...projects];
-    setProjects(updated);
-    saveProjects(updated);
 
     // Create architecture-specific 4+1 diagrams
     const viewTemplates = getViewTemplatesByArchStyle(newArch);
     const diagrams = viewTemplates.map((tpl) => ({
-      id: `diag-${p.id}-${tpl.view}`,
-      project_id: p.id,
+      id: uuidv4(),
+      project_id: projectId,
       name: tpl.name,
       uml_type: tpl.umlType,
       view_type: tpl.view,
@@ -66,33 +81,63 @@ export default function Dashboard() {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }));
-    localStorage.setItem(`odt_diagrams_${p.id}`, JSON.stringify(diagrams));
 
-    // Seed diagram content for predefined architecture templates
-    diagrams.forEach((diag) => {
-      const seed = getTemplateSeed(newArch, diag);
-      localStorage.setItem(`odt_elements_${p.id}_${diag.id}`, JSON.stringify(seed.elements));
-      localStorage.setItem(`odt_connectors_${p.id}_${diag.id}`, JSON.stringify(seed.connectors));
-    });
+    if (isGuest) {
+      // Guest mode: localStorage
+      const updated = [p, ...projects];
+      setProjects(updated);
+      saveProjectsLocal(updated);
+      localStorage.setItem(`odt_diagrams_${projectId}`, JSON.stringify(diagrams));
+
+      diagrams.forEach((diag) => {
+        const seed = getTemplateSeed(newArch, diag);
+        localStorage.setItem(`odt_elements_${projectId}_${diag.id}`, JSON.stringify(seed.elements));
+        localStorage.setItem(`odt_connectors_${projectId}_${diag.id}`, JSON.stringify(seed.connectors));
+      });
+    } else {
+      // Authenticated: Supabase
+      const created = await db.createProject(p);
+      if (!created) return;
+
+      await db.createDiagrams(diagrams);
+
+      // Seed diagram content
+      for (const diag of diagrams) {
+        const seed = getTemplateSeed(newArch, diag);
+        if (seed.elements.length > 0 || seed.connectors.length > 0) {
+          await db.seedDiagramData(diag.id, seed.elements, seed.connectors);
+        }
+      }
+
+      setProjects(prev => [created, ...prev]);
+    }
 
     setShowCreate(false);
     setNewName('');
     setNewArch('custom');
-    navigate(`/editor/${p.id}`);
+    navigate(`/editor/${projectId}`);
   }
 
-  function deleteProject(id: string) {
+  async function deleteProject(id: string) {
     if (!confirm('Delete this project and all its diagrams?')) return;
-    const updated = projects.filter(p => p.id !== id);
-    setProjects(updated);
-    saveProjects(updated);
-    // Clean up diagram data
-    const views = ['scenario', 'logical', 'development', 'process', 'physical'];
-    views.forEach(v => {
-      localStorage.removeItem(`odt_elements_${id}_diag-${id}-${v}`);
-      localStorage.removeItem(`odt_connectors_${id}_diag-${id}-${v}`);
-    });
-    localStorage.removeItem(`odt_diagrams_${id}`);
+
+    if (isGuest) {
+      const updated = projects.filter(p => p.id !== id);
+      setProjects(updated);
+      saveProjectsLocal(updated);
+      // Clean up diagram data using stored diagram IDs
+      const storedDiags: { id: string }[] = JSON.parse(localStorage.getItem(`odt_diagrams_${id}`) || '[]');
+      storedDiags.forEach(d => {
+        localStorage.removeItem(`odt_elements_${id}_${d.id}`);
+        localStorage.removeItem(`odt_connectors_${id}_${d.id}`);
+      });
+      localStorage.removeItem(`odt_diagrams_${id}`);
+    } else {
+      const ok = await db.deleteProject(id);
+      if (ok) {
+        setProjects(prev => prev.filter(p => p.id !== id));
+      }
+    }
   }
 
   function formatDate(dateStr: string) {
@@ -162,7 +207,7 @@ export default function Dashboard() {
           <div>
             <h1>My Projects</h1>
             <p className="dash-subtitle">
-              {projects.length} project{projects.length !== 1 ? 's' : ''}{isGuest ? ' · Guest mode' : ''}
+              {loading ? 'Loading...' : `${projects.length} project${projects.length !== 1 ? 's' : ''}`}{isGuest ? ' · Guest mode' : ''}
             </p>
           </div>
           <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
