@@ -10,20 +10,19 @@ import ValidationPanel from '../components/ValidationPanel';
 import CodeGenPanel from '../components/CodeGenPanel';
 import ExportDialog from '../components/ExportDialog';
 import { validateDiagram, ValidationError } from '../lib/validationEngine';
+import * as db from '../lib/supabaseData';
 import { v4 as uuidv4 } from 'uuid';
 import '../styles/editor.css';
 
 /*
- * Demo mode: All data is stored in localStorage.
- * Diagrams key: odt_diagrams_{projectId}
- * Elements key: odt_elements_{projectId}_{diagramId}
- * Connectors key: odt_connectors_{projectId}_{diagramId}
+ * Authenticated users: data stored in Supabase
+ * Guests: data stored in localStorage
  */
 
 export default function Editor() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
   const canvasRef = useRef<SVGSVGElement>(null);
 
   // Project & diagrams
@@ -48,32 +47,51 @@ export default function Editor() {
 
   // Save state
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
+  const [saving, setSaving] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const activeDiagram = diagrams.find(d => d.id === activeDiagramId);
   const selectedElement = elements.find(e => e.id === selectedId);
   const selectedConnector = connectors.find(c => c.id === selectedConnectorId);
 
-  // ── Load project data from localStorage ──
+  // ── Load project data ──
   useEffect(() => {
     if (!projectId) return;
 
-    // Load project
-    const projs: Project[] = JSON.parse(localStorage.getItem('odt_projects') || '[]');
-    const proj = projs.find(p => p.id === projectId);
-    if (proj) setProject(proj);
+    async function load() {
+      if (isGuest) {
+        // Guest mode: localStorage
+        const projs: Project[] = JSON.parse(localStorage.getItem('odt_projects') || '[]');
+        const proj = projs.find(p => p.id === projectId);
+        if (proj) setProject(proj);
 
-    // Load diagrams
-    const diags: Diagram[] = JSON.parse(localStorage.getItem(`odt_diagrams_${projectId}`) || '[]');
-    if (diags.length > 0) {
-      setDiagrams(diags);
-      setActiveDiagramId(diags[0].id);
-      setActiveView(diags[0].view_type as ViewType);
-      loadDiagramData(diags[0].id);
+        const diags: Diagram[] = JSON.parse(localStorage.getItem(`odt_diagrams_${projectId}`) || '[]');
+        if (diags.length > 0) {
+          setDiagrams(diags);
+          setActiveDiagramId(diags[0].id);
+          setActiveView(diags[0].view_type as ViewType);
+          loadDiagramDataLocal(diags[0].id);
+        }
+      } else {
+        // Authenticated: Supabase
+        const projs = await db.fetchProjects();
+        const proj = projs.find(p => p.id === projectId);
+        if (proj) setProject(proj);
+
+        const diags = await db.fetchDiagrams(projectId!);
+        if (diags.length > 0) {
+          setDiagrams(diags);
+          setActiveDiagramId(diags[0].id);
+          setActiveView(diags[0].view_type as ViewType);
+          await loadDiagramDataSupabase(diags[0].id);
+        }
+      }
     }
-  }, [projectId]);
+    load();
+  }, [projectId, isGuest]);
 
-  function loadDiagramData(diagId: string) {
+  // ── Load diagram data (localStorage) ──
+  function loadDiagramDataLocal(diagId: string) {
     const els: DiagramElement[] = JSON.parse(
       localStorage.getItem(`odt_elements_${projectId}_${diagId}`) || '[]'
     );
@@ -87,36 +105,60 @@ export default function Editor() {
     setConnectingFrom(null);
   }
 
+  // ── Load diagram data (Supabase) ──
+  async function loadDiagramDataSupabase(diagId: string) {
+    const data = await db.fetchDiagramData(diagId);
+    setElements(data.elements);
+    setConnectors(data.connectors);
+    setSelectedId(null);
+    setSelectedConnectorId(null);
+    setConnectingFrom(null);
+  }
+
   // ── Switch 4+1 View ──
   function switchView(view: ViewType) {
-    // Save current diagram first
     saveNow();
     setActiveView(view);
     const diagram = diagrams.find(d => d.view_type === view);
     if (diagram) {
       setActiveDiagramId(diagram.id);
-      loadDiagramData(diagram.id);
+      if (isGuest) {
+        loadDiagramDataLocal(diagram.id);
+      } else {
+        loadDiagramDataSupabase(diagram.id);
+      }
     }
   }
 
-  // ── Save to localStorage ──
+  // ── Save ──
   function saveNow() {
     if (!projectId || !activeDiagramId) return;
-    localStorage.setItem(
-      `odt_elements_${projectId}_${activeDiagramId}`,
-      JSON.stringify(elements)
-    );
-    localStorage.setItem(
-      `odt_connectors_${projectId}_${activeDiagramId}`,
-      JSON.stringify(connectors)
-    );
-    setLastSaved(new Date());
+
+    if (isGuest) {
+      localStorage.setItem(
+        `odt_elements_${projectId}_${activeDiagramId}`,
+        JSON.stringify(elements)
+      );
+      localStorage.setItem(
+        `odt_connectors_${projectId}_${activeDiagramId}`,
+        JSON.stringify(connectors)
+      );
+      setLastSaved(new Date());
+    } else {
+      setSaving(true);
+      db.saveDiagramData(activeDiagramId, elements, connectors)
+        .then(() => {
+          setLastSaved(new Date());
+          setSaving(false);
+        })
+        .catch(() => setSaving(false));
+    }
   }
 
   const triggerSave = useCallback(() => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(() => saveNow(), 1000);
-  }, [projectId, activeDiagramId, elements, connectors]);
+    saveTimerRef.current = setTimeout(() => saveNow(), 1500);
+  }, [projectId, activeDiagramId, elements, connectors, isGuest]);
 
   // Save when elements/connectors change
   useEffect(() => {
@@ -235,6 +277,7 @@ export default function Editor() {
   }
 
   const timeSinceSave = () => {
+    if (saving) return 'Saving...';
     const s = Math.floor((Date.now() - lastSaved.getTime()) / 1000);
     if (s < 5) return 'Just saved';
     if (s < 60) return `Saved ${s}s ago`;
@@ -256,6 +299,7 @@ export default function Editor() {
         </div>
         <div className="editor-topbar-filename">
           {project?.name || 'Loading...'}
+          {isGuest && <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 8 }}>(guest)</span>}
         </div>
         <div style={{ flex: 1 }} />
         <button className="btn btn-sm btn-secondary" onClick={saveNow}>💾 Save</button>
@@ -325,6 +369,8 @@ export default function Editor() {
         )}
         <span style={{ flex: 1 }} />
         {connectingFrom && <span className="status-connecting">Click target element to connect...</span>}
+        <span>{isGuest ? '📍 Local' : '☁️ Cloud'}</span>
+        <span className="status-sep">|</span>
         <span>{timeSinceSave()}</span>
       </div>
 
@@ -350,6 +396,9 @@ export default function Editor() {
         <ExportDialog
           canvasRef={canvasRef}
           projectName={project?.name || 'diagram'}
+          diagramId={activeDiagramId}
+          isGuest={isGuest}
+          userId={user?.id || null}
           onClose={() => setShowExport(false)}
         />
       )}
