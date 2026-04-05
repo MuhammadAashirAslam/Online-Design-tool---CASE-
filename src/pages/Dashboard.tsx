@@ -204,7 +204,7 @@ export default function Dashboard() {
     <div className="dashboard">
       {/* Top nav */}
       <nav className="dash-nav">
-        <div className="dash-nav-brand">⬡ ODT</div>
+        <div className="dash-nav-brand">⬡ NaqshaFlow</div>
         <div className="dash-nav-tabs">
           <button className={`dash-tab ${activeTab === 'projects' ? 'active' : ''}`} onClick={goToProjectsTab}>My Projects</button>
           <button className={`dash-tab ${activeTab === 'templates' ? 'active' : ''}`} onClick={goToTemplatesTab}>Templates</button>
@@ -232,7 +232,7 @@ export default function Dashboard() {
         {/* Guest banner */}
         {isGuest && (
           <div className="guest-banner">
-            <span>👋 You're using ODT as a guest. Your work is saved locally in this browser.</span>
+            <span>👋 You're using NaqshaFlow as a guest. Your work is saved locally in this browser.</span>
             <Link to="/signup" className="btn btn-primary btn-sm">Create Account</Link>
           </div>
         )}

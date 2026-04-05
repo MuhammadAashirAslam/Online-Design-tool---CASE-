@@ -36,7 +36,7 @@ export default function Signup() {
   return (
     <div className="auth-bg">
       <div className="auth-card">
-        <div className="logo-text">⬡ ODT</div>
+        <div className="logo-text">⬡ NaqshaFlow</div>
         <h1>Create account</h1>
         <p className="subtitle">Start designing UML diagrams in seconds</p>
 

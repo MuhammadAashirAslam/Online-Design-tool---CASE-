@@ -291,7 +291,7 @@ export default function Editor() {
         <button className="btn btn-ghost btn-sm" onClick={() => { saveNow(); navigate('/'); }}>
           ← Back
         </button>
-        <div className="editor-topbar-brand">⬡ ODT</div>
+        <div className="editor-topbar-brand">⬡ NaqshaFlow</div>
         <div className="editor-topbar-menus">
           <button className="topbar-menu-btn" onClick={() => setShowExport(true)}>Export</button>
           <button className="topbar-menu-btn" onClick={runValidation}>Validate</button>
