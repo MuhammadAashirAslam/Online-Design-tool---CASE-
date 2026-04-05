@@ -1,4 +1,4 @@
-# ODT - Online Design Tool
+# NaqshaFlow
 
 A web-based CASE (Computer-Aided Software Engineering) application for creating UML diagrams using the 4+1 architectural view model.
 

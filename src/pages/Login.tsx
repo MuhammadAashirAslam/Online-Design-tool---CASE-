@@ -33,7 +33,7 @@ export default function Login() {
       <div className="auth-card">
         <div className="logo-text">⬡ ODT</div>
         <h1>Welcome back</h1>
-        <p className="subtitle">Sign in to your Online Design Tool account</p>
+        <p className="subtitle">Sign in to your NaqshaFlow account</p>
 
         {error && <div className="auth-error">{error}</div>}
 
