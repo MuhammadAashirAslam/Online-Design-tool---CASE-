@@ -1,8 +1,10 @@
 import { useState, RefObject } from 'react';
 import * as db from '../lib/supabaseData';
+import { DiagramElement } from '../types';
 
 interface ExportDialogProps {
   canvasRef: RefObject<SVGSVGElement | null>;
+  elements: DiagramElement[];
   projectName: string;
   diagramId: string | null;
   isGuest: boolean;
@@ -11,18 +13,47 @@ interface ExportDialogProps {
 }
 
 export default function ExportDialog({
-  canvasRef, projectName, diagramId, isGuest, userId, onClose,
+  canvasRef, elements, projectName, diagramId, isGuest, userId, onClose,
 }: ExportDialogProps) {
   const [format, setFormat] = useState<'png' | 'svg'>('png');
   const [exporting, setExporting] = useState(false);
   const [cloudUrl, setCloudUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
+  function getExportBounds() {
+    if (elements.length === 0) {
+      return { minX: 0, minY: 0, width: 1200, height: 800 };
+    }
+
+    const padding = 40;
+    const minX = Math.min(...elements.map(el => el.x)) - padding;
+    const minY = Math.min(...elements.map(el => el.y)) - padding;
+    const maxX = Math.max(...elements.map(el => el.x + el.width)) + padding;
+    const maxY = Math.max(...elements.map(el => el.y + el.height)) + padding;
+
+    return {
+      minX,
+      minY,
+      width: Math.max(1, Math.ceil(maxX - minX)),
+      height: Math.max(1, Math.ceil(maxY - minY)),
+    };
+  }
+
   /** Generate a blob from the SVG canvas in the chosen format. */
   async function generateBlob(): Promise<Blob | null> {
     if (!canvasRef.current) return null;
 
-    const svgElement = canvasRef.current;
+    const svgElement = canvasRef.current.cloneNode(true) as SVGSVGElement;
+    const { minX, minY, width, height } = getExportBounds();
+
+    const zoomGroup = svgElement.querySelector('g[transform]');
+    if (zoomGroup) zoomGroup.setAttribute('transform', 'translate(0,0) scale(1)');
+
+    svgElement.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svgElement.setAttribute('width', String(width));
+    svgElement.setAttribute('height', String(height));
+    svgElement.setAttribute('viewBox', `${minX} ${minY} ${width} ${height}`);
+
     const serializer = new XMLSerializer();
     const svgString = serializer.serializeToString(svgElement);
     const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
