@@ -699,7 +699,7 @@ const Canvas = forwardRef<SVGSVGElement, CanvasProps>(({
         className="canvas-svg"
       >
         {renderMarkerDefs()}
-        <g transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
+        <g id="export-content-root" transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
           {/* Dot grid background */}
           <rect x={-5000} y={-5000} width={10000} height={10000} fill="url(#dotGrid)" />
 

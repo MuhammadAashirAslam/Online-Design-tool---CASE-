@@ -26,16 +26,23 @@ export default function ExportDialog({
     }
 
     const padding = 40;
-    const minX = Math.min(...elements.map(el => el.x)) - padding;
-    const minY = Math.min(...elements.map(el => el.y)) - padding;
-    const maxX = Math.max(...elements.map(el => el.x + el.width)) + padding;
-    const maxY = Math.max(...elements.map(el => el.y + el.height)) + padding;
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (const el of elements) {
+      minX = Math.min(minX, el.x);
+      minY = Math.min(minY, el.y);
+      maxX = Math.max(maxX, el.x + el.width);
+      maxY = Math.max(maxY, el.y + el.height);
+    }
 
     return {
-      minX,
-      minY,
-      width: Math.max(1, Math.ceil(maxX - minX)),
-      height: Math.max(1, Math.ceil(maxY - minY)),
+      minX: minX - padding,
+      minY: minY - padding,
+      width: Math.max(1, Math.ceil(maxX - minX + padding * 2)),
+      height: Math.max(1, Math.ceil(maxY - minY + padding * 2)),
     };
   }
 
@@ -46,7 +53,7 @@ export default function ExportDialog({
     const svgElement = canvasRef.current.cloneNode(true) as SVGSVGElement;
     const { minX, minY, width, height } = getExportBounds();
 
-    const zoomGroup = svgElement.querySelector('g[transform]');
+    const zoomGroup = svgElement.querySelector('#export-content-root');
     if (zoomGroup) zoomGroup.setAttribute('transform', 'translate(0,0) scale(1)');
 
     svgElement.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
