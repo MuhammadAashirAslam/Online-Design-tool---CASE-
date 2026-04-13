@@ -1,6 +1,7 @@
 import { useState, RefObject } from 'react';
 import * as db from '../lib/supabaseData';
 import { DiagramElement } from '../types';
+import { EXPORT_CONTENT_ROOT_ID } from '../constants/export';
 
 interface ExportDialogProps {
   canvasRef: RefObject<SVGSVGElement | null>;
@@ -56,7 +57,7 @@ export default function ExportDialog({
     const svgElement = canvasRef.current.cloneNode(true) as SVGSVGElement;
     const { minX, minY, width, height } = getExportBounds();
 
-    const zoomGroup = svgElement.querySelector('#export-content-root');
+    const zoomGroup = svgElement.querySelector(`#${EXPORT_CONTENT_ROOT_ID}`);
     if (zoomGroup) {
       zoomGroup.setAttribute('transform', 'translate(0,0) scale(1)');
     } else {
