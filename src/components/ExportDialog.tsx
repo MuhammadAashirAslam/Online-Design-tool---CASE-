@@ -15,7 +15,7 @@ interface ExportDialogProps {
 export default function ExportDialog({
   canvasRef, elements, projectName, diagramId, isGuest, userId, onClose,
 }: ExportDialogProps) {
-  const MIN_EXPORT_DIMENSION = 1;
+  const MIN_EXPORT_DIMENSION = 64;
   const [format, setFormat] = useState<'png' | 'svg'>('png');
   const [exporting, setExporting] = useState(false);
   const [cloudUrl, setCloudUrl] = useState<string | null>(null);
@@ -54,7 +54,7 @@ export default function ExportDialog({
     const svgElement = canvasRef.current.cloneNode(true) as SVGSVGElement;
     const { minX, minY, width, height } = getExportBounds();
 
-    const zoomGroup = svgElement.querySelector('#export-content-root') || svgElement.querySelector('g[transform]');
+    const zoomGroup = svgElement.querySelector('#export-content-root');
     if (zoomGroup) {
       zoomGroup.setAttribute('transform', 'translate(0,0) scale(1)');
     } else {
