@@ -15,6 +15,9 @@ interface ExportDialogProps {
 export default function ExportDialog({
   canvasRef, elements, projectName, diagramId, isGuest, userId, onClose,
 }: ExportDialogProps) {
+  const DEFAULT_EXPORT_WIDTH = 1200;
+  const DEFAULT_EXPORT_HEIGHT = 800;
+  const EXPORT_PADDING = 40;
   const MIN_EXPORT_DIMENSION = 64;
   const [format, setFormat] = useState<'png' | 'svg'>('png');
   const [exporting, setExporting] = useState(false);
@@ -23,10 +26,9 @@ export default function ExportDialog({
 
   function getExportBounds() {
     if (elements.length === 0) {
-      return { minX: 0, minY: 0, width: 1200, height: 800 };
+      return { minX: 0, minY: 0, width: DEFAULT_EXPORT_WIDTH, height: DEFAULT_EXPORT_HEIGHT };
     }
 
-    const padding = 40;
     let minX = Infinity;
     let minY = Infinity;
     let maxX = -Infinity;
@@ -40,10 +42,10 @@ export default function ExportDialog({
     }
 
     return {
-      minX: minX - padding,
-      minY: minY - padding,
-      width: Math.max(MIN_EXPORT_DIMENSION, Math.ceil(maxX - minX + padding * 2)),
-      height: Math.max(MIN_EXPORT_DIMENSION, Math.ceil(maxY - minY + padding * 2)),
+      minX: minX - EXPORT_PADDING,
+      minY: minY - EXPORT_PADDING,
+      width: Math.max(MIN_EXPORT_DIMENSION, Math.ceil(maxX - minX + EXPORT_PADDING * 2)),
+      height: Math.max(MIN_EXPORT_DIMENSION, Math.ceil(maxY - minY + EXPORT_PADDING * 2)),
     };
   }
 
