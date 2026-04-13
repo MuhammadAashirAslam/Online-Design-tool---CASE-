@@ -1,8 +1,11 @@
 import { useState, RefObject } from 'react';
 import * as db from '../lib/supabaseData';
+import { DiagramElement } from '../types';
+import { EXPORT_CONTENT_ROOT_ID } from '../constants/export';
 
 interface ExportDialogProps {
   canvasRef: RefObject<SVGSVGElement | null>;
+  elements: DiagramElement[];
   projectName: string;
   diagramId: string | null;
   isGuest: boolean;
@@ -11,18 +14,61 @@ interface ExportDialogProps {
 }
 
 export default function ExportDialog({
-  canvasRef, projectName, diagramId, isGuest, userId, onClose,
+  canvasRef, elements, projectName, diagramId, isGuest, userId, onClose,
 }: ExportDialogProps) {
+  const DEFAULT_EXPORT_WIDTH = 1200;
+  const DEFAULT_EXPORT_HEIGHT = 800;
+  const EXPORT_PADDING = 40;
+  const MIN_EXPORT_DIMENSION = 64;
   const [format, setFormat] = useState<'png' | 'svg'>('png');
   const [exporting, setExporting] = useState(false);
   const [cloudUrl, setCloudUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
+  function getExportBounds() {
+    if (elements.length === 0) {
+      return { minX: 0, minY: 0, width: DEFAULT_EXPORT_WIDTH, height: DEFAULT_EXPORT_HEIGHT };
+    }
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (const el of elements) {
+      minX = Math.min(minX, el.x);
+      minY = Math.min(minY, el.y);
+      maxX = Math.max(maxX, el.x + el.width);
+      maxY = Math.max(maxY, el.y + el.height);
+    }
+
+    return {
+      minX: minX - EXPORT_PADDING,
+      minY: minY - EXPORT_PADDING,
+      width: Math.max(MIN_EXPORT_DIMENSION, Math.ceil(maxX - minX + EXPORT_PADDING * 2)),
+      height: Math.max(MIN_EXPORT_DIMENSION, Math.ceil(maxY - minY + EXPORT_PADDING * 2)),
+    };
+  }
+
   /** Generate a blob from the SVG canvas in the chosen format. */
   async function generateBlob(): Promise<Blob | null> {
     if (!canvasRef.current) return null;
 
-    const svgElement = canvasRef.current;
+    const svgElement = canvasRef.current.cloneNode(true) as SVGSVGElement;
+    const { minX, minY, width, height } = getExportBounds();
+
+    const zoomGroup = svgElement.querySelector(`#${EXPORT_CONTENT_ROOT_ID}`);
+    if (zoomGroup) {
+      zoomGroup.setAttribute('transform', 'translate(0,0) scale(1)');
+    } else {
+      console.warn('Export warning: content transform group not found; export may be clipped.');
+    }
+
+    svgElement.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svgElement.setAttribute('width', String(width));
+    svgElement.setAttribute('height', String(height));
+    svgElement.setAttribute('viewBox', `${minX} ${minY} ${width} ${height}`);
+
     const serializer = new XMLSerializer();
     const svgString = serializer.serializeToString(svgElement);
     const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });

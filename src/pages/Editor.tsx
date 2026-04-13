@@ -395,6 +395,7 @@ export default function Editor() {
       {showExport && (
         <ExportDialog
           canvasRef={canvasRef}
+          elements={elements}
           projectName={project?.name || 'diagram'}
           diagramId={activeDiagramId}
           isGuest={isGuest}
