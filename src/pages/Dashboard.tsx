@@ -39,6 +39,7 @@ export default function Dashboard() {
   const [newName, setNewName] = useState('');
   const [newArch, setNewArch] = useState<ArchStyle>('custom');
   const [activeTab, setActiveTab] = useState<'projects' | 'templates'>('projects');
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const templatesSectionRef = useRef<HTMLElement | null>(null);
   const mainRef = useRef<HTMLElement | null>(null);
   const createLockRef = useRef(false);
@@ -208,6 +209,7 @@ export default function Dashboard() {
         <div className="dash-nav-tabs">
           <button className={`dash-tab ${activeTab === 'projects' ? 'active' : ''}`} onClick={goToProjectsTab}>My Projects</button>
           <button className={`dash-tab ${activeTab === 'templates' ? 'active' : ''}`} onClick={goToTemplatesTab}>Templates</button>
+          <button className="dash-tab" onClick={() => isGuest ? setShowLoginPrompt(true) : navigate('/tickets')}>Support Tickets</button>
         </div>
         <div style={{ flex: 1 }} />
         <div className="dash-nav-right">
@@ -356,6 +358,23 @@ export default function Dashboard() {
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20 }}>
               <button className="btn btn-secondary" onClick={() => setProjectToDelete(null)} disabled={deleting}>Cancel</button>
               <button className="btn btn-danger" onClick={deleteProject} disabled={deleting}>{deleting ? 'Deleting...' : 'Delete Project'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLoginPrompt && (
+        <div className="modal-overlay" onClick={() => setShowLoginPrompt(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ textAlign: 'center', maxWidth: 420 }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>🎫</div>
+            <h2 style={{ marginBottom: 8 }}>Having Problems?</h2>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 20 }}>
+              Login to launch a support ticket and our team will help you resolve any issues.
+            </p>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+              <button className="btn btn-secondary" onClick={() => setShowLoginPrompt(false)}>Cancel</button>
+              <Link to="/login" className="btn btn-primary">Sign In</Link>
+              <Link to="/signup" className="btn btn-primary" style={{ background: 'var(--brand-600)' }}>Create Account</Link>
             </div>
           </div>
         </div>

@@ -354,3 +354,84 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- ══════════════════════════════════════
+-- 11. TICKETS  (Complaint / Support System)
+-- ══════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS public.tickets (
+  id           uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id      uuid REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+  subject      text NOT NULL DEFAULT '',
+  description  text NOT NULL DEFAULT '',
+  category     text NOT NULL DEFAULT 'other'
+    CHECK (category IN (
+      'bug', 'feature-request', 'ui-issue',
+      'performance', 'account', 'other'
+    )),
+  priority     text NOT NULL DEFAULT 'medium'
+    CHECK (priority IN ('low', 'medium', 'high', 'critical')),
+  status       text NOT NULL DEFAULT 'open'
+    CHECK (status IN ('open', 'in-progress', 'resolved', 'closed')),
+  project_id   uuid REFERENCES public.projects(id) ON DELETE SET NULL,
+  project_name text DEFAULT '',
+  created_at   timestamptz DEFAULT now(),
+  updated_at   timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_tickets_user   ON public.tickets(user_id);
+CREATE INDEX IF NOT EXISTS idx_tickets_status ON public.tickets(status);
+
+ALTER TABLE public.tickets ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own tickets"
+  ON public.tickets FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create tickets"
+  ON public.tickets FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own tickets"
+  ON public.tickets FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own tickets"
+  ON public.tickets FOR DELETE
+  USING (auth.uid() = user_id);
+
+CREATE TRIGGER tickets_updated_at
+  BEFORE UPDATE ON public.tickets
+  FOR EACH ROW EXECUTE FUNCTION moddatetime(updated_at);
+
+-- ══════════════════════════════════════
+-- 12. TICKET REPLIES
+-- ══════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS public.ticket_replies (
+  id         uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  ticket_id  uuid REFERENCES public.tickets(id) ON DELETE CASCADE NOT NULL,
+  user_id    uuid REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+  username   text NOT NULL DEFAULT '',
+  message    text NOT NULL DEFAULT '',
+  is_staff   boolean DEFAULT false,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_ticket_replies_ticket ON public.ticket_replies(ticket_id);
+
+ALTER TABLE public.ticket_replies ENABLE ROW LEVEL SECURITY;
+
+-- Users can view replies on their own tickets
+CREATE POLICY "Users can view replies on own tickets"
+  ON public.ticket_replies FOR SELECT
+  USING (
+    ticket_id IN (SELECT id FROM public.tickets WHERE user_id = auth.uid())
+  );
+
+-- Users can add replies to their own tickets
+CREATE POLICY "Users can create replies on own tickets"
+  ON public.ticket_replies FOR INSERT
+  WITH CHECK (
+    ticket_id IN (SELECT id FROM public.tickets WHERE user_id = auth.uid())
+  );

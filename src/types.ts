@@ -125,6 +125,42 @@ export interface ValidationError {
   rule: string;
 }
 
+/* ── Ticketing System ── */
+
+export type TicketPriority = 'low' | 'medium' | 'high' | 'critical';
+export type TicketStatus = 'open' | 'in-progress' | 'resolved' | 'closed';
+export type TicketCategory =
+  | 'bug'
+  | 'feature-request'
+  | 'ui-issue'
+  | 'performance'
+  | 'account'
+  | 'other';
+
+export interface Ticket {
+  id: string;
+  user_id: string;
+  subject: string;
+  description: string;
+  category: TicketCategory;
+  priority: TicketPriority;
+  status: TicketStatus;
+  project_id?: string;
+  project_name?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TicketReply {
+  id: string;
+  ticket_id: string;
+  user_id: string;
+  username: string;
+  message: string;
+  is_staff: boolean;
+  created_at: string;
+}
+
 export type ActiveTool =
   | 'select'
   | ElementType

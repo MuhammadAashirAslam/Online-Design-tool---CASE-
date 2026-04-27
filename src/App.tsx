@@ -3,6 +3,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Editor from './pages/Editor';
+import Tickets from './pages/Tickets';
 import ProtectedRoute from './components/ProtectedRoute';
 
 export default function App() {
@@ -12,6 +13,7 @@ export default function App() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/editor/:projectId" element={<ProtectedRoute><Editor /></ProtectedRoute>} />
+      <Route path="/tickets" element={<ProtectedRoute><Tickets /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
