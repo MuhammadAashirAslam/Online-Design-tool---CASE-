@@ -142,7 +142,7 @@ export default function Tickets() {
 
     const created = await ticketDb.createTicket({
       id,
-      user_id: user.id,
+      user_id: user!.id,
       subject: newSubject.trim(),
       description: newDescription.trim(),
       category: newCategory,
@@ -185,8 +185,8 @@ export default function Tickets() {
     const created = await ticketDb.createReply({
       id: uuidv4(),
       ticket_id: selectedTicket.id,
-      user_id: user.id,
-      username: user.user_metadata?.username || user.email?.split('@')[0] || 'User',
+      user_id: user!.id,
+      username: user!.user_metadata?.username || user!.email?.split('@')[0] || 'User',
       message: replyText.trim(),
       is_staff: false,
     });
